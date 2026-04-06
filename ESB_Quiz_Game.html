@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ESB Certification Quiz — Entrepreneurship &amp; Small Business</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1f2430;
+    --gold: #e8b84b;
+    --gold-dim: #a07d2a;
+    --gold-glow: rgba(232,184,75,0.18);
+    --text: #eef0f5;
+    --text-dim: #7b8299;
+    --green: #3ecf7a;
+    --green-bg: rgba(62,207,122,0.12);
+    --red: #f26c6c;
+    --red-bg: rgba(242,108,108,0.12);
+    --blue: #5b9cf6;
+    --blue-bg: rgba(91,156,246,0.12);
+    --radius: 14px;
+    --shadow: 0 8px 48px rgba(0,0,0,0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(232,184,75,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 85%, rgba(91,156,246,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 780px;
+    padding: 20px;
+  }
+
+  .screen { display: none; animation: fadeIn 0.45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+
+  /* WELCOME */
+  #welcome-screen { text-align: center; padding: 60px 20px; }
+
+  .logo-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-glow);
+    border: 1px solid rgba(232,184,75,0.3);
+    border-radius: 100px; padding: 6px 18px;
+    font-size: 12px; font-weight: 600; color: var(--gold);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 32px;
+  }
+  .logo-badge::before { content: '◆'; font-size: 9px; }
+
+  #welcome-screen h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    line-height: 1.12; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 30%, var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  #welcome-screen p.subtitle {
+    color: var(--text-dim); font-size: 1.05rem;
+    max-width: 480px; margin: 0 auto 40px; line-height: 1.6;
+  }
+
+  .stats-row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 44px; }
+  .stat-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 22px; text-align: center; }
+  .stat-pill .num   { font-family: 'DM Mono', monospace; font-size: 1.5rem; color: var(--gold); font-weight: 500; }
+  .stat-pill .label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+
+  .btn-start {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a; border: none; border-radius: 100px;
+    padding: 16px 52px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: 0.04em;
+    transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+    box-shadow: 0 4px 28px rgba(232,184,75,0.35);
+  }
+  .btn-start:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 8px 36px rgba(232,184,75,0.48); }
+
+  /* NAME INPUT */
+  .name-input-wrap { margin-bottom: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .name-input-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-dim); }
+  .name-input {
+    background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 13px 20px; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text);
+    width: 100%; max-width: 340px; text-align: center; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .name-input::placeholder { color: var(--text-dim); opacity: 0.6; }
+  .name-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+  .name-error { font-size: 0.78rem; color: var(--red); display: none; animation: fadeIn 0.2s ease; }
+  .name-error.show { display: block; }
+
+  .tip-box {
+    margin-top: 36px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 22px;
+    font-size: 0.85rem; color: var(--text-dim); line-height: 1.5;
+  }
+  .tip-box strong { color: var(--gold); }
+
+  /* QUIZ */
+  #quiz-screen { padding: 10px 0; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 14px; }
+  .q-counter { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+  .q-counter span { color: var(--gold); font-weight: 600; }
+
+  .progress-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 100px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+  .score-badge { font-family: 'DM Mono', monospace; font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; color: var(--text-dim); white-space: nowrap; }
+  .score-badge .pts { color: var(--green); font-weight: 600; }
+
+  .q-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px 34px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+  .q-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5; }
+
+  .q-topic { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold); background: var(--gold-glow); border: 1px solid rgba(232,184,75,0.2); border-radius: 6px; padding: 4px 10px; margin-bottom: 16px; }
+  .multi-tag { display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--blue); background: var(--blue-bg); border: 1px solid rgba(91,156,246,0.3); border-radius: 6px; padding: 4px 10px; margin-bottom: 16px; margin-left: 8px; }
+  .q-text { font-family: 'Playfair Display', serif; font-size: 1.25rem; line-height: 1.55; margin-bottom: 8px; font-weight: 700; }
+  .q-context { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 24px; padding: 14px 16px; background: var(--surface2); border-radius: 10px; border-left: 3px solid var(--gold-dim); }
+
+  .options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .opt { background: var(--surface2); border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 18px; cursor: pointer; display: flex; align-items: center; gap: 14px; transition: border-color 0.18s, background 0.18s, transform 0.12s; font-size: 0.95rem; line-height: 1.45; user-select: none; }
+  .opt:hover:not(.locked) { border-color: var(--gold-dim); background: rgba(232,184,75,0.06); transform: translateX(3px); }
+  .opt.selected  { border-color: var(--gold);  background: var(--gold-glow); }
+  .opt.correct   { border-color: var(--green) !important; background: var(--green-bg) !important; }
+  .opt.incorrect { border-color: var(--red)   !important; background: var(--red-bg)   !important; }
+  .opt.locked    { cursor: default; }
+
+  .opt-letter { font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 600; color: var(--text-dim); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; min-width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.18s, color 0.18s, border-color 0.18s; }
+  .opt.selected  .opt-letter { background: var(--gold);  color: #0a0a0a; border-color: var(--gold);  }
+  .opt.correct   .opt-letter { background: var(--green); color: #fff;    border-color: var(--green); }
+  .opt.incorrect .opt-letter { background: var(--red);   color: #fff;    border-color: var(--red);   }
+  .opt-check { margin-left: auto; font-size: 1.1rem; flex-shrink: 0; }
+
+  .actions-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .btn-hint { background: none; border: 1.5px solid var(--border); border-radius: 100px; padding: 10px 20px; color: var(--text-dim); font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 500; cursor: pointer; transition: border-color 0.18s, color 0.18s; display: flex; align-items: center; gap: 6px; }
+  .btn-hint:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .btn-hint::before { content: '💡'; font-size: 0.95rem; }
+
+  .btn-submit { background: linear-gradient(135deg, var(--gold), #c9922a); color: #0a0a0a; border: none; border-radius: 100px; padding: 12px 36px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: transform 0.18s, filter 0.18s, box-shadow 0.18s; box-shadow: 0 3px 18px rgba(232,184,75,0.3); }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-next { background: var(--surface2); color: var(--text); border: 1.5px solid var(--border); border-radius: 100px; padding: 12px 36px; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 600; cursor: pointer; transition: border-color 0.18s, background 0.18s; display: none; margin-left: auto; }
+  .btn-next:hover { border-color: var(--gold); background: var(--gold-glow); }
+  .btn-next.show { display: flex; align-items: center; gap: 6px; }
+  .btn-next::after { content: '→'; }
+
+  .hint-panel { background: var(--surface2); border: 1px solid rgba(91,156,246,0.3); border-radius: 12px; padding: 14px 18px; margin-top: 14px; font-size: 0.87rem; color: var(--blue); line-height: 1.6; display: none; animation: fadeIn 0.3s ease; }
+  .hint-panel.show { display: block; }
+  .hint-panel::before { content: '💡 Hint: '; font-weight: 700; }
+
+  .explanation-panel { border-radius: 12px; padding: 16px 18px; margin-top: 14px; font-size: 0.87rem; line-height: 1.65; display: none; animation: fadeIn 0.3s ease; }
+  .explanation-panel.correct-exp   { background: var(--green-bg); border: 1px solid rgba(62,207,122,0.3);  color: #a8f0c6; }
+  .explanation-panel.incorrect-exp { background: var(--red-bg);   border: 1px solid rgba(242,108,108,0.3); color: #f7b3b3; }
+  .explanation-panel.show { display: block; }
+  .explanation-panel .exp-head { font-weight: 700; font-size: 0.95rem; margin-bottom: 5px; }
+
+  /* RESULT */
+  #result-screen { text-align: center; padding: 50px 20px; }
+
+  .result-ring { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--border); display: flex; align-items: center; justify-content: center; flex-direction: column; margin: 0 auto 28px; position: relative; background: var(--surface); }
+  .result-ring svg { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px); transform: rotate(-90deg); }
+  .result-ring .score-num   { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--gold); line-height: 1; }
+  .result-ring .score-denom { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+
+  #result-screen h2         { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 8px; }
+  #result-screen .result-sub{ color: var(--text-dim); margin-bottom: 36px; }
+
+  .breakdown-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+  .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .breakdown-card .bc-num   { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 600; }
+  .breakdown-card .bc-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
+  .bc-correct .bc-num { color: var(--green); }
+  .bc-wrong   .bc-num { color: var(--red);   }
+  .bc-pct     .bc-num { color: var(--gold);  }
+
+  /* ATTRIBUTION CARD */
+  .result-attribution { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; text-align: left; }
+  .attr-icon { font-size: 1.8rem; flex-shrink: 0; }
+  .attr-name { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+  .attr-meta { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text-dim); line-height: 1.7; }
+
+  .cert-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; text-align: left; }
+  .cert-icon { font-size: 2rem; flex-shrink: 0; }
+  .cert-bar h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; }
+  .cert-bar p  { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+
+  .btn-restart { background: linear-gradient(135deg, var(--gold), #c9922a); color: #0a0a0a; border: none; border-radius: 100px; padding: 14px 44px; font-family: 'DM Sans', sans-serif; font-size: 1rem; font-weight: 700; cursor: pointer; box-shadow: 0 3px 22px rgba(232,184,75,0.35); transition: transform 0.18s, filter 0.18s; }
+  .btn-restart:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+  .review-list { text-align: left; margin-bottom: 32px; }
+  .review-list h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 14px; color: var(--text-dim); }
+  .review-item { display: flex; gap: 12px; padding: 12px 14px; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 8px; font-size: 0.85rem; line-height: 1.45; }
+  .review-item .ri-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .ri-dot.right { background: var(--green); }
+  .ri-dot.wrong { background: var(--red);   }
+  .review-item .ri-q  { flex: 1; }
+  .review-item .ri-ans{ color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+  .ri-correct-ans { color: var(--green); font-size: 0.78rem; font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 500px) {
+    .q-card { padding: 22px 18px; }
+    .breakdown-grid { gap: 8px; }
+    .breakdown-card { padding: 12px; }
+    .breakdown-card .bc-num { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME -->
+  <div id="welcome-screen" class="screen active">
+    <div class="logo-badge">ESB Certification Prep</div>
+    <h1>Entrepreneurship &amp;<br/>Small Business</h1>
+    <p class="subtitle">Master the concepts, terminology, and frameworks you need to pass the ESB certification exam — one question at a time.</p>
+
+    <div class="stats-row">
+      <div class="stat-pill">
+        <div class="num" id="stat-bank-count">—</div>
+        <div class="label">Question Bank</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num" id="stat-session-count">—</div>
+        <div class="label">Per Session</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">💡</div>
+        <div class="label">Hints &amp; Tips</div>
+      </div>
+    </div>
+
+    <div class="name-input-wrap">
+      <label class="name-input-label" for="player-name">Enter your name to begin</label>
+      <input
+        class="name-input"
+        id="player-name"
+        type="text"
+        placeholder="Your full name…"
+        maxlength="60"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter') startQuiz()"
+      />
+      <span class="name-error" id="name-error">Please enter your name before starting.</span>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">Begin the Challenge</button>
+    <div class="tip-box">
+      <strong>How it works:</strong> Every session, 90% of the question bank is randomly selected and shuffled — so the mix is always different and every question in the bank can appear. Use the hint button if you're stuck, then read the explanation after each answer. Some questions have multiple correct answers — they'll be marked clearly!
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" class="screen">
+    <div class="top-bar">
+      <div class="q-counter">Question <span id="q-num">1</span> / <span id="q-total">—</span></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="score-badge">Score: <span class="pts" id="live-score">0</span></div>
+    </div>
+    <div class="q-card">
+      <div id="q-tags">
+        <span class="q-topic" id="q-topic">Topic</span>
+        <span class="multi-tag" id="multi-tag" style="display:none">Select All That Apply</span>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-context" id="q-context" style="display:none"></div>
+      <div class="options-grid" id="options-grid"></div>
+      <div class="hint-panel" id="hint-panel"></div>
+      <div class="explanation-panel" id="explanation-panel">
+        <div class="exp-head" id="exp-head"></div>
+        <div id="exp-body"></div>
+      </div>
+      <div class="actions-row">
+        <button class="btn-hint" onclick="showHint()">Hint</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitAnswer()" disabled>Submit</button>
+        <button class="btn-next"   id="btn-next"   onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen" class="screen">
+    <div class="result-ring">
+      <svg viewBox="0 0 148 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="74" cy="74" r="68" stroke="#1f2430" stroke-width="8"/>
+        <circle cx="74" cy="74" r="68" stroke="url(#rg)" stroke-width="8"
+          stroke-linecap="round" stroke-dasharray="427"
+          id="result-arc" stroke-dashoffset="427"/>
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#e8b84b"/>
+            <stop offset="100%" stop-color="#c9922a"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="score-num"   id="final-score-num">0</div>
+      <div class="score-denom" id="final-score-denom">/ —</div>
+    </div>
+
+    <h2 id="result-title">Well Done!</h2>
+    <p class="result-sub" id="result-sub">Here's how you performed.</p>
+
+    <div class="breakdown-grid">
+      <div class="breakdown-card bc-correct"><div class="bc-num" id="bc-correct">0</div><div class="bc-label">Correct</div></div>
+      <div class="breakdown-card bc-wrong">  <div class="bc-num" id="bc-wrong">0</div>  <div class="bc-label">Incorrect</div></div>
+      <div class="breakdown-card bc-pct">    <div class="bc-num" id="bc-pct">0%</div>   <div class="bc-label">Score</div></div>
+    </div>
+
+    <!-- Name / date / time attribution -->
+    <div class="result-attribution">
+      <div class="attr-icon">🎓</div>
+      <div>
+        <div class="attr-name" id="attr-name"></div>
+        <div class="attr-meta" id="attr-meta"></div>
+      </div>
+    </div>
+
+    <div class="cert-bar" id="cert-bar"></div>
+
+    <div class="review-list">
+      <h3>Review Your Answers</h3>
+      <div id="review-items"></div>
+    </div>
+
+    <button class="btn-restart" onclick="restartQuiz()">Try Again 🔄</button>
+  </div>
+
+</div><!-- /#app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  TEST BANK  (25 questions — all equal, all rotate)
+//
+//  TRUE ROTATION: each session the entire bank is shuffled and the top
+//  SESSION_SIZE (90%) are dealt. A random ~10% sit out every time, so
+//  every question can appear and the mix is different each session.
+// ═══════════════════════════════════════════════════════════════════════
+const TEST_BANK = [
+  {
+    topic: "Business Structure",
+    text: "You need to create a legal structure for your small business. You would like some of the benefits enjoyed by large corporations, but do not want to be taxed twice. You have four partners who will be shareholders. None of you plan to sell your ownership shares to the public, but do want to be protected from business liabilities. Which legal structure should you set up for your business?",
+    multi: false,
+    options: ["Sole Proprietorship","C‑Corporation","S‑Corporation","Limited Liability Company"],
+    correct: [2],
+    hint: "Think of a smaller business",
+    explanation: "An S‑Corporation is best because it provides liability protection like a C‑Corp but suits smaller businesses. It allows up to 100 U.S. shareholders, avoids double taxation (profits taxed only to shareholders), and requires a separate business tax return."
+  },
+  {
+    topic: "Definition and Meaning",
+    text: "Which statement defines entrepreneurship?",
+    multi: false,
+    options: ["Quickly advancing in positions within a corporation.","Acquiring leadership and managerial skills.","Setting up a business with the aim to make a profit.","Marketing and selling products."],
+    correct: [2],
+    hint: "Think about which option describes what entrepreneurs set up rather than the skills they use.",
+    explanation: "Entrepreneurship means starting a business to earn a profit. It involves leadership and management skills but is defined by creating and running a business, not climbing the corporate ladder."
+  },
+  {
+    topic: "Definition and Meaning",
+    text: "Successful entrepreneurs have mindsets that typically possess which three characteristics? (Choose three)",
+    multi: true,
+    options: ["Self‑reliance","Status quo","Creativity","Collaboration","Nervous"],
+    correct: [0,2,3],
+    hint: "Focus on the traits that help them change how things are done, not how they feel.",
+    explanation: "Entrepreneurs succeed by being self‑reliant, creative, and collaborative, and they challenge the status quo instead of being nervous or accepting things as they are."
+  },
+  {
+    topic: "Definition and Meaning",
+    text: "Which three characteristics help identify a business opportunity? (Choose three)",
+    multi: true,
+    options: ["Service","Price","Size","Quality","Marketing","Branding"],
+    correct: [0,1,3],
+    hint: "Look for what is missing in the basics customers care about first.",
+    explanation: "A business opportunity appears when the market lacks good price, quality, selection, location, or service, and you judge these basics before worrying about things like branding and marketing."
+  },
+  {
+    topic: "Benefits of Entrepreneurship",
+    text: "Which is one of the greatest benefits of being an entrepreneur?",
+    multi: false,
+    options: ["Paying less taxes","Meeting new people","Quick return on investment","Schedule control"],
+    correct: [3],
+    hint: "Which is more important, Freedom or Money? Are you an Eagle or a Prisoner?",
+    explanation: "One of the top benefits of entrepreneurship is having control over your schedule."
+  },
+  {
+    topic: "Opportunity Evaluation",
+    text: "The owner of a landscaping business notices competitors are not offering water features and wants to evaluate the opportunity. What should the entrepreneur do FIRST?",
+    multi: false,
+    options: ["Perform a financial audit","Ask the customers in the area if they are interested","Contact the water department","Determine if there is a supply chain"],
+    correct: [1],
+    hint: "Think of who you are serving.",
+    explanation: "The first step is always determining customer demand. If demand exists, then the business can evaluate supply chain, feasibility, and financial return."
+  },
+  {
+    topic: "Business Planning",
+    text: "Which two documents summarize the business plan of a company? (Choose two)",
+    multi: true,
+    options: ["Marketing Plan","Balance Sheet","Lean Canvas","Pitch Deck"],
+    correct: [2,3],
+    hint: "Choose the tools that boil the whole business plan down to just the essentials.",
+    explanation: "Lean Canvas: A single‑page snapshot of the business model. Pitch Deck: A slide deck summarizing the key elements of the business."
+  },
+  {
+    topic: "Financial Statements",
+    text: "Which financial statement shows a company's revenues and expenses over a specific period of time?",
+    multi: false,
+    options: ["Balance Sheet","Cash Flow Statement","Income Statement","Statement of Owner's Equity"],
+    correct: [2],
+    hint: "Think profit and loss.",
+    explanation: "The Income Statement (also called Profit & Loss Statement) reports revenues and expenses over a period, showing net profit or loss."
+  },
+  {
+    topic: "Marketing",
+    text: "Which of the following best describes a target market?",
+    multi: false,
+    options: ["Every person who could possibly buy a product","A specific group of consumers most likely to buy a product","The geographic area where a business operates","The competitors of a business"],
+    correct: [1],
+    hint: "Think narrow, not broad.",
+    explanation: "A target market is a defined group of customers with shared characteristics who are most likely to purchase your product or service."
+  },
+  {
+    topic: "Marketing",
+    text: "The 4 Ps of marketing include which of the following? (Choose four)",
+    multi: true,
+    options: ["Product","Profit","Price","Place","Promotion","People"],
+    correct: [0,2,3,4],
+    hint: "Remember the classic marketing mix framework.",
+    explanation: "The 4 Ps of the marketing mix are Product, Price, Place, and Promotion. Profit and People are not part of the original framework."
+  },
+  {
+    topic: "Business Structure",
+    text: "Which type of business structure has unlimited personal liability for the owner?",
+    multi: false,
+    options: ["Limited Liability Company","S‑Corporation","Sole Proprietorship","C‑Corporation"],
+    correct: [2],
+    hint: "Think about the simplest, most common structure for one person starting out.",
+    explanation: "A Sole Proprietorship offers no legal separation between the owner and the business, meaning the owner is personally liable for all business debts and obligations."
+  },
+  {
+    topic: "Business Planning",
+    text: "A SWOT analysis evaluates which four factors?",
+    multi: true,
+    options: ["Strengths","Strategies","Weaknesses","Opportunities","Threats","Timelines"],
+    correct: [0,2,3,4],
+    hint: "Internal factors come first, then external.",
+    explanation: "SWOT stands for Strengths, Weaknesses, Opportunities, and Threats. Strengths and Weaknesses are internal; Opportunities and Threats are external."
+  },
+  {
+    topic: "Finance",
+    text: "What is the term for the point at which total revenue equals total costs?",
+    multi: false,
+    options: ["Profit Margin","Break‑Even Point","Return on Investment","Net Income"],
+    correct: [1],
+    hint: "You're not making money yet, but you're not losing it either.",
+    explanation: "The break‑even point is where total revenues exactly equal total costs — the business neither makes a profit nor incurs a loss."
+  },
+  {
+    topic: "Finance",
+    text: "Which financial document shows what a business owns, owes, and the owner's equity at a specific point in time?",
+    multi: false,
+    options: ["Income Statement","Cash Flow Statement","Balance Sheet","Budget"],
+    correct: [2],
+    hint: "Assets = Liabilities + Owner's Equity",
+    explanation: "The Balance Sheet is a snapshot of a business's financial position on a specific date, listing assets, liabilities, and owner's equity."
+  },
+  {
+    topic: "Business Planning",
+    text: "Which section of a business plan describes the day-to-day operations of a business?",
+    multi: false,
+    options: ["Executive Summary","Operations Plan","Market Analysis","Financial Plan"],
+    correct: [1],
+    hint: "Think about how the business actually runs every day.",
+    explanation: "The Operations Plan describes the daily processes, facilities, technology, and workflow needed to run the business."
+  },
+  {
+    topic: "Marketing",
+    text: "What is the difference between a trademark and a copyright?",
+    multi: false,
+    options: ["A trademark protects inventions; a copyright protects brand names","A trademark protects brand identifiers like logos; a copyright protects original creative works","They are the same thing","A copyright protects products; a trademark protects services"],
+    correct: [1],
+    hint: "Think logos vs. books and songs.",
+    explanation: "A trademark protects brand identifiers such as names, logos, and slogans. A copyright protects original creative works such as books, music, and software."
+  },
+  {
+    topic: "Business Structure",
+    text: "In a general partnership, how is liability shared?",
+    multi: false,
+    options: ["Only the managing partner is liable","Liability is capped at each partner's investment","All partners share unlimited personal liability","The business absorbs all liability"],
+    correct: [2],
+    hint: "General = no protection.",
+    explanation: "In a general partnership, each partner has unlimited personal liability for the debts and actions of the business, including actions taken by other partners."
+  },
+  {
+    topic: "Finance",
+    text: "Which of the following is an example of a variable cost?",
+    multi: false,
+    options: ["Monthly rent","Insurance premiums","Raw materials","Equipment depreciation"],
+    correct: [2],
+    hint: "It changes based on how much you produce.",
+    explanation: "Variable costs change in proportion to production volume. Raw materials are a classic example because you need more of them as you produce more units."
+  },
+  {
+    topic: "Entrepreneurship Concepts",
+    text: "What does the term 'bootstrapping' mean in entrepreneurship?",
+    multi: false,
+    options: ["Taking out a large business loan","Partnering with a venture capitalist","Funding a business using personal savings and revenue","Crowdfunding through an online platform"],
+    correct: [2],
+    hint: "You're pulling yourself up without outside help.",
+    explanation: "Bootstrapping means starting and growing a business using only personal savings and the revenue generated by the business, without outside investors or loans."
+  },
+  {
+    topic: "Marketing",
+    text: "What is market segmentation?",
+    multi: false,
+    options: ["Dividing a market into distinct subgroups of consumers with common needs","Setting a price for each customer segment","Distributing products in different geographic regions","Creating separate advertisements for TV and digital"],
+    correct: [0],
+    hint: "You're slicing the market into pieces based on shared traits.",
+    explanation: "Market segmentation is the process of dividing a broad market into smaller, distinct groups of consumers who have common needs, characteristics, or behaviors."
+  },
+  {
+    topic: "Entrepreneurship Concepts",
+    text: "Which of the following best describes an 'intrapreneur'?",
+    multi: false,
+    options: ["An entrepreneur who starts multiple businesses","An employee who acts entrepreneurially within an existing organization","A silent partner in a business","An investor in a startup"],
+    correct: [1],
+    hint: "Think: entrepreneurship from the inside.",
+    explanation: "An intrapreneur is an employee within a company who takes on entrepreneurial traits — innovation, risk-taking, and initiative — to develop new ideas or products inside the organization."
+  },
+  {
+    topic: "Finance",
+    text: "What does ROI stand for, and what does it measure?",
+    multi: false,
+    options: ["Rate of Income; measures profit per employee","Return on Investment; measures the gain or loss relative to the cost of an investment","Revenue over Interest; measures loan interest efficiency","Risk of Investment; measures financial exposure"],
+    correct: [1],
+    hint: "Did you get more than you put in?",
+    explanation: "ROI (Return on Investment) measures how much profit or benefit was generated relative to the cost of the investment. It is expressed as a percentage."
+  },
+  {
+    topic: "Business Planning",
+    text: "What is the primary purpose of an executive summary in a business plan?",
+    multi: false,
+    options: ["To provide detailed financial projections","To list all employees and their roles","To give a concise overview of the entire business plan","To outline the marketing strategy in detail"],
+    correct: [2],
+    hint: "It's the first thing investors read — keep it short and powerful.",
+    explanation: "The executive summary is a brief overview of the entire business plan, designed to grab the reader's attention and summarize the key points of the business concept, market, and financials."
+  },
+  {
+    topic: "Business Structure",
+    text: "Which business structure allows for pass-through taxation AND limited liability for ALL members, with no restriction on the number of members?",
+    multi: false,
+    options: ["S‑Corporation","General Partnership","Limited Liability Company","Sole Proprietorship"],
+    correct: [2],
+    hint: "It's flexible and newer than corporations.",
+    explanation: "An LLC (Limited Liability Company) provides limited liability to all members and pass-through taxation, and unlike an S‑Corp, has no restriction on the number or type of members."
+  },
+  {
+    topic: "Finance",
+    text: "A startup has fixed costs of $50,000, a selling price per unit of $25, and a variable cost per unit of $15. What is the break-even quantity?",
+    multi: false,
+    options: ["2,000 units","3,333 units","5,000 units","10,000 units"],
+    correct: [2],
+    hint: "Break-even = Fixed Costs ÷ (Price − Variable Cost)",
+    explanation: "Break-even quantity = Fixed Costs ÷ Contribution Margin = $50,000 ÷ ($25 − $15) = $50,000 ÷ $10 = 5,000 units."
+  },
+  {
+    topic: "Entrepreneurship Concepts",
+    text: "Which of the following is the BEST example of a first-mover advantage?",
+    multi: false,
+    options: ["A company that copies a competitor's product at a lower price","A business that enters an established market with a well-known brand","A startup that introduces a new product category and captures market share before competitors","A franchisee opening in a saturated market"],
+    correct: [2],
+    hint: "You got there first — and grabbed the customers.",
+    explanation: "First-mover advantage occurs when a company gains a competitive edge by being the first to enter a new market or product category, allowing it to build brand recognition and customer loyalty before rivals arrive."
+  },
+  {
+    topic: "Finance",
+    text: "Which three elements are required to have a Trade Secret? (Choose three~ GMetrix gotta be kidding XP)",
+    multi: true,
+    options: ["Must be a service","Original work must be in a tangible form","Information has economic value not generally known","A unique logo or brand names","Others cannot legitimately obtain the information","Subject to reasonable efforts to maintain its secrecy"],
+    correct: [2,4,5],
+    hint: "Think about information that is valuable because it is secret and actively kept that way, not about services or branding.",
+    explanation: "A trade secret is valuable hidden information that others want and can’t legally get, and the owner takes reasonable steps to keep it secret; it can be any info, product, or method, but not logos or brand names."
+  },
+  {
+    topic: "Finance",
+    text: "A cooking company wants to identify a target market for a new AI‑enabled toaster oven. Which types of behaviors are analyzed when defining a target market? (Choose two)",
+    multi: true,
+    options: ["Demographic","Geographic","Marketing","Organizational"],
+    correct: [0,1],
+    hint: "Think about who they are and where they live, not how the company is run.",
+    explanation: "Demographics (age, income, education, etc). Geographics (location, regional preferences), Behavioral and Psychographic traits"
+  },
+  {
+    topic: "Finance",
+    text: "A hair salon acquired 100 new customers last year. Costs in the marketing and sales areas were the following: Marketing costs = $1,000, Sales costs = $10,000, Salaries = $96,000. What was the customer acquisition cost?",
+    multi: false,
+    options: ["$107,000","$110","$1,070","$11,000"],
+    correct: [1],
+    hint: "Use the Customer Acquisition Cost Formula",
+    explanation: "1,000+10,000100=110\frac{1,000 + 10,000}{100} = 1101001,000+10,000​=110"
+  },
+  {
+    topic: "Finance",
+    text: "Which two marketing platforms are offline marketing platforms? (Choose two - who writes these questions?)",
+    multi: true,
+    options: ["Email","Social Media","TV ads","Google ads","Flyers and Pamphlets"],
+    correct: [2,4],
+    hint: "Think Traditional",
+    explanation: "Offline marketing uses traditional, non-digital channels."
+  },
+  {
+    topic: "Finance",
+    text: "Your company manufactures 72-hour emergency kits and sells them at low profit margins. You want to expand your customer base but have a limited budget. What marketing method would be the best choice?",
+    multi: false,
+    options: ["Social Media","Local Television Ad","Distribute Flyers","Email"],
+    correct: [0],
+    hint: "Think cost.",
+    explanation: "Social media has the widest reach for very low cost, ideal for limited budgets."
+  },
+  {
+    topic: "Finance",
+    text: "A DJ wants to analyze market reactions to new music played at last weekend's dance. Which would be the most effective way to gather reactions from attendees?",
+    multi: false,
+    options: ["Personal Interviews","Surveys","Focus Groups","Observation"],
+    correct: [1],
+    hint: "Think convenience.",
+    explanation: "Surveys can be sent through email and social media, reaching all attendees."
+  },
+  {
+    topic: "Finance",
+    text: "Which element of a marketing plan provides a synopsis of details that will be outlined later in the plan?",
+    multi: false,
+    options: ["Marketing Mix","Delivery Plan","Situation Analysis","Executive Summary/Business Description"],
+    correct: [3],
+    hint: "Think big picture.",
+    explanation: "The Executive Summary provides the big-picture overview of the entire marketing plan."
+  },
+  {
+    topic: "Finance",
+    text: "A toy company wants to create a product/market fit hypothesis for a new toy. Which element of the hypothesis involves writing a statement explaining what the new toy does and how it is different from the competition?",
+    multi: false,
+    options: ["Determine the target customer","Value proposition","Identify underserved customer needs","UX"],
+    correct: [1],
+    hint: "Think 'How does this help the customer?'",
+    explanation: "A value proposition defines what the product does, how it helps the customer, and how it is different from competing products."
+  },
+  {
+    topic: "Finance",
+    text: "Which Sales Channel has been opened to manufacturers because of digital tools?",
+    multi: false,
+    options: ["Direct‑to‑Consumer","B2B","Distribution","Wholesale"],
+    correct: [0],
+    hint: "Think no middle man needed.",
+    explanation: "Digital tools (social media, websites, analytics) allow brands to sell directly to end consumers without needing a retail intermediary"
+  },
+  {
+    topic: "Finance",
+    text: "Which two ways can Customer Service and Support affect sales? (Choose two - GMetrix not that good tbh)",
+    multi: true,
+    options: ["Coordinating shipping","Closing the deal with rapid engagement","More Sales through Customer Evangelists","Distributing marketing information","Increased Sales through Responsiveness and Personalization"],
+    correct: [2,4],
+    hint: "Think of customer satisfaction.",
+    explanation: "Excellent customer service leads to customers feeling valued → more loyalty and repeat sales. Happy customers share their positive experience (“customer evangelists”), influencing others."
+  },
+  {
+    topic: "Finance",
+    text: "Which two characteristics of direct distribution differ from fulfillment centers? (Choose two)",
+    multi: true,
+    options: ["Direct distribution is also known as a zero-level channel","The manufacturer controls all aspects of distribution","Packing and shipping is done by a third-party","Warehousing is outsourced","Inventory is stored for longer periods of time"],
+    correct: [0,1],
+    hint: "Think no intermediaries.",
+    explanation: "Direct distribution = manufacturer → customer, no intermediaries."
+  },
+  {
+    topic: "Finance",
+    text: "You create a new type of electric shaver that is lightweight, portable, and holds a longer charge. You want to use value engineering to improve it. Which action is an example of value engineering?",
+    multi: false,
+    options: ["Moving manufacturing to a third‑party plant","Putting a smaller motor inside the shaver to make the shaver run faster","Using cheaper materials for the cover without affecting overall quality","Putting a faster motor inside the shaver to increase the quality of a shave"],
+    correct: [2],
+    hint: "Money drives Capitalism.",
+    explanation: "Value engineering = reducing cost without reducing performance."
+  },
+  {
+    topic: "Finance",
+    text: "You have an idea for a new product. Market research suggests customers need it and will embrace it. What is one of the first steps you must do before creating a product prototype?",
+    multi: false,
+    options: ["Identify materials","Launch a marketing campaign","Create a social media following","Pre‑sale the product for funding"],
+    correct: [0],
+    hint: "Think about the simplest things/ parts/ concepts.",
+    explanation: "You cannot build a prototype—or run campaigns—if materials required for the product are not known or obtainable."
+  },
+  {
+    topic: "Finance",
+    text: "A startup business is looking for ways to get funded. Which type of funding funds a business through private investments during a set period of time?",
+    multi: false,
+    options: ["Accelerator","Bootstrapping","Shark","Incubator"],
+    correct: [3],
+    hint: "Think something Private.",
+    explanation: "Incubators provide private investment over a set incubation period, along with mentoring and resources."
+  },
+  {
+    topic: "Finance",
+    text: "According to the balance sheet, what is your equity in the business? Balance Sheet -> Assets: Cash: $10,000 / Inventory: $2,000 / Equipment: $5,000 / Total Assets: $17,000. Liabilities: Credit card balance: $2,500 / Long‑term debt: $0 / Unearned revenue: $3,500 / Total Liabilities: $6,000",
+    multi: false,
+    options: ["$17,000","$10,000","$11,000","$7,000"],
+    correct: [2],
+    hint: "Use the correct formula lol.",
+    explanation: "Equity = Total Assets - Total Liabilities -> 17,000 - 6,000 = 11,000."
+  },
+  {
+    topic: "Finance",
+    text: "You spent $1,000 on a PPC campaign that resulted in $1,200 in sales. What was last month’s Return on Investment (ROI)?",
+    multi: false,
+    options: ["80%","20%","120%","0.2%"],
+    correct: [1],
+    hint: "Use ROI formula -> ROI= (Return−Investment/Investment) x 100%",
+    explanation: "ROI= (Return−Investment/Investment) x 100%= 1200-1000 / 1000 x 100% = 200/1000 x 100% = 20%"
+  },
+  {
+    topic: "Finance",
+    text: "Which two costs should be included when calculating start‑up costs for a business? (Choose two)",
+    multi: true,
+    options: ["Payroll","Permits, licenses, and incorporation fees","Business cards","Rent","Utilities"],
+    correct: [1,2],
+    hint: "What do you need to pay before starting a start up, think of the BASICs",
+    explanation: "Start‑up costs = expenses before opening the business."
+  },
+  {
+    topic: "Finance",
+    text: "A nail salon pays $2,500 rent per month and pays nail technicians $20 per client visit. Supplies cost $500 per month. At 150 visits per month, how much must the salon mark up each visit, percentage‑wise, to break even?",
+    multi: false,
+    options: ["200%","100%","20%","50%"],
+    correct: [1],
+    hint: "Add up ALL monthly costs (fixed + variable), divide by 150 visits to get cost per visit, then calculate the markup % over the $20 variable cost.",
+    explanation: "Total costs = ($2,500 + $500) + ($20 × 150) = $6,000. Break-even price = $6,000 ÷ 150 = $40/visit. Markup = ($40 − $20) ÷ $20 × 100 = 100%."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+//  ROTATION CONFIG
+//  90% of the bank is dealt each session; the other ~10% sit out.
+//  Which questions sit out is random — every session is a fresh draw.
+// ═══════════════════════════════════════════════════════════════════════
+const SESSION_RATIO = 0.9;
+const SESSION_SIZE  = Math.round(TEST_BANK.length * SESSION_RATIO); // 23 of 25
+
+// ── State ──────────────────────────────────────────────────────────────
+let SESSION_QUESTIONS = [];
+let currentQ          = 0;
+let score             = 0;
+let selectedOptions   = [];
+let answered          = false;
+let userAnswers       = [];
+let playerName        = '';
+let attemptTime       = null;
+
+// ── Init welcome stat pills ────────────────────────────────────────────
+(function initStats() {
+  document.getElementById('stat-bank-count').textContent    = TEST_BANK.length;
+  document.getElementById('stat-session-count').textContent = SESSION_SIZE;
+})();
+
+// ── Fisher-Yates shuffle ───────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function startQuiz() {
+  const nameInput = document.getElementById('player-name');
+  const nameErr   = document.getElementById('name-error');
+  playerName = nameInput.value.trim();
+  if (!playerName) { nameErr.classList.add('show'); nameInput.focus(); return; }
+  nameErr.classList.remove('show');
+
+  attemptTime = new Date();
+
+  // TRUE ROTATION: shuffle full bank, deal first SESSION_SIZE
+  SESSION_QUESTIONS = shuffle(TEST_BANK).slice(0, SESSION_SIZE);
+
+  currentQ = 0; score = 0; userAnswers = [];
+  document.getElementById('q-total').textContent = SESSION_QUESTIONS.length;
+  document.getElementById('welcome-screen').classList.remove('active');
+  document.getElementById('quiz-screen').classList.add('active');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function renderQuestion() {
+  const q = SESSION_QUESTIONS[currentQ];
+  answered = false; selectedOptions = [];
+
+  document.getElementById('q-num').textContent  = currentQ + 1;
+  document.getElementById('progress-fill').style.width = ((currentQ / SESSION_QUESTIONS.length) * 100) + '%';
+  document.getElementById('live-score').textContent    = score;
+  document.getElementById('q-topic').textContent       = q.topic || 'General';
+  document.getElementById('q-text').textContent        = q.text;
+  document.getElementById('multi-tag').style.display   = q.multi ? 'inline-block' : 'none';
+
+  const ctx = document.getElementById('q-context');
+  if (q.context) { ctx.style.display = 'block'; ctx.textContent = q.context; } else ctx.style.display = 'none';
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  ['A','B','C','D','E','F'].slice(0, q.options.length).forEach((letter, i) => {
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML = `<div class="opt-letter">${letter}</div><div style="flex:1">${q.options[i]}</div><div class="opt-check"></div>`;
+    el.addEventListener('click', () => toggleOption(i, el, q.multi));
+    grid.appendChild(el);
+  });
+
+  document.getElementById('hint-panel').classList.remove('show');
+  document.getElementById('hint-panel').textContent = '';
+  document.getElementById('explanation-panel').classList.remove('show','correct-exp','incorrect-exp');
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-submit').style.display = '';
+  document.getElementById('btn-next').classList.remove('show');
+
+  const card = document.querySelector('.q-card');
+  card.style.animation = 'none'; card.offsetHeight; card.style.animation = 'fadeIn 0.35s ease';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function toggleOption(i, el, multi) {
+  if (answered) return;
+  if (multi) {
+    if (selectedOptions.includes(i)) { selectedOptions = selectedOptions.filter(x => x !== i); el.classList.remove('selected'); }
+    else { selectedOptions.push(i); el.classList.add('selected'); }
+  } else {
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    selectedOptions = [i]; el.classList.add('selected');
+  }
+  document.getElementById('btn-submit').disabled = selectedOptions.length === 0;
+}
+
+function showHint() {
+  const panel = document.getElementById('hint-panel');
+  if (panel.classList.contains('show')) {
+    // If already visible, hide it
+    panel.classList.remove('show');
+  } else {
+    // Show the hint and set its text from the current question
+    panel.textContent = SESSION_QUESTIONS[currentQ].hint;
+    panel.classList.add('show');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function submitAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q         = SESSION_QUESTIONS[currentQ];
+  const isCorrect = arraysMatch(selectedOptions.slice().sort(), [...q.correct].sort());
+  if (isCorrect) score++;
+  userAnswers.push({ idx: currentQ, selected: [...selectedOptions], isCorrect });
+
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    el.classList.add('locked');
+    if (q.correct.includes(i))                        { el.classList.add('correct');   el.querySelector('.opt-check').textContent = '✓'; }
+    else if (selectedOptions.includes(i))              { el.classList.add('incorrect'); el.querySelector('.opt-check').textContent = '✗'; }
+  });
+
+  const expPanel = document.getElementById('explanation-panel');
+  expPanel.classList.remove('correct-exp','incorrect-exp');
+  expPanel.classList.add('show', isCorrect ? 'correct-exp' : 'incorrect-exp');
+  document.getElementById('exp-head').textContent = isCorrect ? '✓ Correct!' : '✗ Not Quite';
+  document.getElementById('exp-body').textContent = q.explanation;
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('live-score').textContent   = score;
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= SESSION_QUESTIONS.length) showResults(); else renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function showResults() {
+  document.getElementById('quiz-screen').classList.remove('active');
+  document.getElementById('result-screen').classList.add('active');
+
+  const total = SESSION_QUESTIONS.length;
+  const pct   = Math.round((score / total) * 100);
+
+  document.getElementById('final-score-num').textContent   = score;
+  document.getElementById('final-score-denom').textContent = '/ ' + total;
+  document.getElementById('bc-correct').textContent        = score;
+  document.getElementById('bc-wrong').textContent          = total - score;
+  document.getElementById('bc-pct').textContent            = pct + '%';
+
+  setTimeout(() => {
+    const arc = document.getElementById('result-arc');
+    arc.style.transition       = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';
+    arc.style.strokeDashoffset = 2 * Math.PI * 68 * (1 - score / total);
+  }, 200);
+
+  // Attribution
+  const dateStr = attemptTime.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const timeStr = attemptTime.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  document.getElementById('attr-name').textContent = playerName;
+  document.getElementById('attr-meta').innerHTML   = `📅 ${dateStr}<br>🕐 ${timeStr}`;
+
+  let title, sub, icon, certMsg;
+  if      (pct >= 85) { title='🏆 Outstanding!';         sub="You are well-prepared for the ESB certification exam!";          icon='🎓'; certMsg="Excellent work! Your score suggests you're ready to sit the official ESB certification exam. Review any missed questions and you'll be set."; }
+  else if (pct >= 70) { title='⭐ Great Job!';             sub="Solid performance — a little more review and you'll be exam-ready."; icon='📈'; certMsg='Good foundation! Focus on reviewing your incorrect answers and the topics you found challenging. One more practice round should do it.'; }
+  else if (pct >= 50) { title='💪 Keep Going!';           sub="You know the basics — now it's time to solidify your understanding."; icon='📚'; certMsg='Keep studying! Review the explanations for missed questions and revisit the core ESB topics. Practice makes perfect.'; }
+  else                { title='🌱 Just Getting Started'; sub='Every expert was once a beginner. Review and try again!';           icon='🔍'; certMsg="Don't be discouraged! Read through all the explanations carefully and try again. The key concepts will start clicking with more exposure."; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent   = sub;
+  document.getElementById('cert-bar').innerHTML =
+    `<div class="cert-icon">${icon}</div><div><h4>Certification Readiness</h4><p>${certMsg}</p></div>`;
+
+  const reviewEl = document.getElementById('review-items');
+  reviewEl.innerHTML = '';
+  const letters = ['A','B','C','D','E','F'];
+  userAnswers.forEach((ua, n) => {
+    const q = SESSION_QUESTIONS[ua.idx];
+    const el = document.createElement('div');
+    el.className = 'review-item';
+    el.innerHTML = `
+      <div class="ri-dot ${ua.isCorrect ? 'right' : 'wrong'}"></div>
+      <div class="ri-q">
+        <strong>Q${n+1}:</strong> ${q.text.slice(0,70)}…
+        ${!ua.isCorrect ? `<br><span class="ri-correct-ans">Correct: ${q.correct.map(i=>letters[i]).join(', ')}</span>` : ''}
+      </div>
+      <div class="ri-ans">Your answer: ${ua.selected.map(i=>letters[i]).join(', ')}</div>
+    `;
+    reviewEl.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function restartQuiz() {
+  document.getElementById('result-screen').classList.remove('active');
+  const arc = document.getElementById('result-arc');
+  arc.style.transition = 'none'; arc.style.strokeDashoffset = 427;
+  document.getElementById('player-name').value = '';
+  document.getElementById('name-error').classList.remove('show');
+  document.getElementById('welcome-screen').classList.add('active');
+}
+
+function arraysMatch(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+</script>
+</body>
+</html>
