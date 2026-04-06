@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>D4D Certification Quiz — Design for Delight</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1f2430;
+    --gold: #e8b84b;
+    --gold-dim: #a07d2a;
+    --gold-glow: rgba(232,184,75,0.18);
+    --text: #eef0f5;
+    --text-dim: #7b8299;
+    --green: #3ecf7a;
+    --green-bg: rgba(62,207,122,0.12);
+    --red: #f26c6c;
+    --red-bg: rgba(242,108,108,0.12);
+    --blue: #5b9cf6;
+    --blue-bg: rgba(91,156,246,0.12);
+    --radius: 14px;
+    --shadow: 0 8px 48px rgba(0,0,0,0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(232,184,75,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 85%, rgba(91,156,246,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 780px;
+    padding: 20px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeIn 0.45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── WELCOME ── */
+  #welcome-screen { text-align: center; padding: 60px 20px; }
+
+  .logo-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold-glow);
+    border: 1px solid rgba(232,184,75,0.3);
+    border-radius: 100px; padding: 6px 18px;
+    font-size: 12px; font-weight: 600; color: var(--gold);
+    letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 32px;
+  }
+  .logo-badge::before { content: '◆'; font-size: 9px; }
+
+  #welcome-screen h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    line-height: 1.12; margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 30%, var(--gold));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  #welcome-screen p.subtitle {
+    color: var(--text-dim); font-size: 1.05rem;
+    max-width: 480px; margin: 0 auto 40px; line-height: 1.6;
+  }
+
+  .stats-row { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; margin-bottom: 44px; }
+  .stat-pill { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 14px 22px; text-align: center; }
+  .stat-pill .num   { font-family: 'DM Mono', monospace; font-size: 1.5rem; color: var(--gold); font-weight: 500; }
+  .stat-pill .label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+
+  /* Name input */
+  .name-input-wrap { margin-bottom: 28px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .name-input-label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-dim); }
+  .name-input {
+    background: var(--surface); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 13px 20px; font-family: 'DM Sans', sans-serif; font-size: 1rem; color: var(--text);
+    width: 100%; max-width: 340px; text-align: center; outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .name-input::placeholder { color: var(--text-dim); opacity: 0.6; }
+  .name-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px var(--gold-glow); }
+  .name-error { font-size: 0.78rem; color: var(--red); display: none; animation: fadeIn 0.2s ease; }
+  .name-error.show { display: block; }
+
+  .btn-start {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a; border: none; border-radius: 100px;
+    padding: 16px 52px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer; letter-spacing: 0.04em;
+    transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+    box-shadow: 0 4px 28px rgba(232,184,75,0.35);
+  }
+  .btn-start:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 8px 36px rgba(232,184,75,0.48); }
+
+  .tip-box {
+    margin-top: 36px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px 22px;
+    font-size: 0.85rem; color: var(--text-dim); line-height: 1.5;
+  }
+  .tip-box strong { color: var(--gold); }
+
+  /* ── QUIZ ── */
+  #quiz-screen { padding: 10px 0; }
+
+  .top-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; gap: 14px; }
+  .q-counter { font-family: 'DM Mono', monospace; font-size: 0.8rem; color: var(--text-dim); white-space: nowrap; }
+  .q-counter span { color: var(--gold); font-weight: 600; }
+
+  .progress-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 100px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--gold-dim), var(--gold)); border-radius: 100px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+  .score-badge { font-family: 'DM Mono', monospace; font-size: 0.78rem; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 5px 12px; color: var(--text-dim); white-space: nowrap; }
+  .score-badge .pts { color: var(--green); font-weight: 600; }
+
+  .q-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 32px 34px; box-shadow: var(--shadow);
+    position: relative; overflow: hidden;
+  }
+  .q-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent); opacity: 0.5;
+  }
+
+  .q-topic {
+    display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold); background: var(--gold-glow);
+    border: 1px solid rgba(232,184,75,0.2); border-radius: 6px; padding: 4px 10px; margin-bottom: 16px;
+  }
+  .multi-tag {
+    display: inline-block; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--blue); background: var(--blue-bg);
+    border: 1px solid rgba(91,156,246,0.3); border-radius: 6px; padding: 4px 10px;
+    margin-bottom: 16px; margin-left: 8px;
+  }
+
+  .q-text { font-family: 'Playfair Display', serif; font-size: 1.25rem; line-height: 1.55; margin-bottom: 8px; font-weight: 700; }
+  .q-context { font-size: 0.88rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 24px; padding: 14px 16px; background: var(--surface2); border-radius: 10px; border-left: 3px solid var(--gold-dim); }
+
+  .options-grid { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+
+  .opt {
+    background: var(--surface2); border: 1.5px solid var(--border); border-radius: 12px;
+    padding: 14px 18px; cursor: pointer; display: flex; align-items: center; gap: 14px;
+    transition: border-color 0.18s, background 0.18s, transform 0.12s;
+    font-size: 0.95rem; line-height: 1.45; user-select: none;
+  }
+  .opt:hover:not(.locked) { border-color: var(--gold-dim); background: rgba(232,184,75,0.06); transform: translateX(3px); }
+  .opt.selected { border-color: var(--gold); background: var(--gold-glow); }
+  .opt.correct  { border-color: var(--green) !important; background: var(--green-bg) !important; }
+  .opt.incorrect{ border-color: var(--red)   !important; background: var(--red-bg)   !important; }
+  .opt.locked   { cursor: default; }
+
+  .opt-letter {
+    font-family: 'DM Mono', monospace; font-size: 0.75rem; font-weight: 600;
+    color: var(--text-dim); background: var(--bg); border: 1px solid var(--border);
+    border-radius: 6px; min-width: 26px; height: 26px; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  .opt.selected  .opt-letter { background: var(--gold);  color: #0a0a0a; border-color: var(--gold);  }
+  .opt.correct   .opt-letter { background: var(--green); color: #fff;    border-color: var(--green); }
+  .opt.incorrect .opt-letter { background: var(--red);   color: #fff;    border-color: var(--red);   }
+  .opt-check { margin-left: auto; font-size: 1.1rem; flex-shrink: 0; }
+
+  .actions-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+
+  .btn-hint {
+    background: none; border: 1.5px solid var(--border); border-radius: 100px;
+    padding: 10px 20px; color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem; font-weight: 500; cursor: pointer;
+    transition: border-color 0.18s, color 0.18s, background 0.18s;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .btn-hint:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .btn-hint::before { content: '💡'; font-size: 0.95rem; }
+  /* Active state when hint is showing */
+  .btn-hint.hint-active { border-color: var(--blue); color: var(--blue); background: var(--blue-bg); }
+  .btn-hint.hint-active::before { content: '🙈'; }
+
+  .btn-submit {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a; border: none; border-radius: 100px;
+    padding: 12px 36px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 700; cursor: pointer;
+    transition: transform 0.18s, filter 0.18s, box-shadow 0.18s;
+    box-shadow: 0 3px 18px rgba(232,184,75,0.3);
+  }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-next {
+    background: var(--surface2); color: var(--text);
+    border: 1.5px solid var(--border); border-radius: 100px;
+    padding: 12px 36px; font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem; font-weight: 600; cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    display: none; margin-left: auto;
+  }
+  .btn-next:hover { border-color: var(--gold); background: var(--gold-glow); }
+  .btn-next.show { display: flex; align-items: center; gap: 6px; }
+  .btn-next::after { content: '→'; }
+
+  .hint-panel {
+    background: var(--surface2); border: 1px solid rgba(91,156,246,0.3);
+    border-radius: 12px; padding: 14px 18px; margin-top: 14px;
+    font-size: 0.87rem; color: var(--blue); line-height: 1.6;
+    display: none; animation: fadeIn 0.3s ease;
+  }
+  .hint-panel.show { display: block; }
+  .hint-panel::before { content: '💡 Hint: '; font-weight: 700; }
+
+  .explanation-panel {
+    border-radius: 12px; padding: 16px 18px; margin-top: 14px;
+    font-size: 0.87rem; line-height: 1.65; display: none; animation: fadeIn 0.3s ease;
+  }
+  .explanation-panel.correct-exp   { background: var(--green-bg); border: 1px solid rgba(62,207,122,0.3);  color: #a8f0c6; }
+  .explanation-panel.incorrect-exp { background: var(--red-bg);   border: 1px solid rgba(242,108,108,0.3); color: #f7b3b3; }
+  .explanation-panel.show { display: block; }
+  .explanation-panel .exp-head { font-weight: 700; font-size: 0.95rem; margin-bottom: 5px; }
+
+  /* ── RESULT ── */
+  #result-screen { text-align: center; padding: 50px 20px; }
+
+  .result-ring {
+    width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--border);
+    display: flex; align-items: center; justify-content: center; flex-direction: column;
+    margin: 0 auto 28px; position: relative; background: var(--surface);
+  }
+  .result-ring svg { position: absolute; inset: -4px; width: calc(100% + 8px); height: calc(100% + 8px); transform: rotate(-90deg); }
+  .result-ring .score-num   { font-family: 'Playfair Display', serif; font-size: 2.2rem; color: var(--gold); line-height: 1; }
+  .result-ring .score-denom { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+
+  #result-screen h2 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 8px; }
+  #result-screen .result-sub { color: var(--text-dim); margin-bottom: 36px; }
+
+  .breakdown-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 36px; }
+  .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+  .breakdown-card .bc-num   { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 600; }
+  .breakdown-card .bc-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
+  .bc-correct .bc-num { color: var(--green); }
+  .bc-wrong   .bc-num { color: var(--red);   }
+  .bc-pct     .bc-num { color: var(--gold);  }
+
+  /* Attribution block (name + time) */
+  .result-attribution {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 18px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; text-align: left;
+  }
+  .attr-icon  { font-size: 1.8rem; flex-shrink: 0; }
+  .attr-name  { font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+  .attr-meta  { font-family: 'DM Mono', monospace; font-size: 0.75rem; color: var(--text-dim); line-height: 1.7; }
+
+  .cert-bar {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px 24px; margin-bottom: 28px; display: flex; align-items: center; gap: 16px; text-align: left;
+  }
+  .cert-icon { font-size: 2rem; flex-shrink: 0; }
+  .cert-bar h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; }
+  .cert-bar p  { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+
+  .btn-restart {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a; border: none; border-radius: 100px;
+    padding: 14px 44px; font-family: 'DM Sans', sans-serif;
+    font-size: 1rem; font-weight: 700; cursor: pointer;
+    box-shadow: 0 3px 22px rgba(232,184,75,0.35);
+    transition: transform 0.18s, filter 0.18s;
+  }
+  .btn-restart:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+  .review-list { text-align: left; margin-bottom: 32px; }
+  .review-list h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 14px; color: var(--text-dim); }
+  .review-item {
+    display: flex; gap: 12px; padding: 12px 14px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 8px; font-size: 0.85rem; line-height: 1.45;
+  }
+  .review-item .ri-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .ri-dot.right { background: var(--green); }
+  .ri-dot.wrong { background: var(--red);   }
+  .review-item .ri-q   { flex: 1; }
+  .review-item .ri-ans { color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+  .ri-correct-ans { color: var(--green); font-size: 0.78rem; font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 500px) {
+    .q-card { padding: 22px 18px; }
+    .breakdown-grid { gap: 8px; }
+    .breakdown-card { padding: 12px; }
+    .breakdown-card .bc-num { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME -->
+  <div id="welcome-screen" class="screen active">
+    <div class="logo-badge">D4D Certification Prep</div>
+    <h1>Design for<br/>Delight</h1>
+    <p class="subtitle">Master the concepts, frameworks, and customer-centric thinking you need for the D4D certification — one question at a time.</p>
+
+    <div class="stats-row">
+      <div class="stat-pill">
+        <div class="num" id="stat-bank-count">—</div>
+        <div class="label">Question Bank</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num" id="stat-session-count">—</div>
+        <div class="label">Per Session</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">💡</div>
+        <div class="label">Hints &amp; Tips</div>
+      </div>
+    </div>
+
+    <div class="name-input-wrap">
+      <label class="name-input-label" for="player-name">Enter your name to begin</label>
+      <input
+        class="name-input"
+        id="player-name"
+        type="text"
+        placeholder="Your full name…"
+        maxlength="60"
+        autocomplete="off"
+        onkeydown="if(event.key==='Enter') startQuiz()"
+      />
+      <span class="name-error" id="name-error">Please enter your name before starting.</span>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">Begin the Challenge</button>
+    <div class="tip-box">
+      <strong>How it works:</strong> Every session, 90% of the question bank is randomly selected and shuffled — so the mix is always different and every question in the bank can appear. Use the hint button if you're stuck (press again to hide it), then read the explanation after each answer. Some questions have multiple correct answers — they'll be marked clearly!
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" class="screen">
+    <div class="top-bar">
+      <div class="q-counter">Question <span id="q-num">1</span> / <span id="q-total">—</span></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="score-badge">Score: <span class="pts" id="live-score">0</span></div>
+    </div>
+
+    <div class="q-card">
+      <div id="q-tags">
+        <span class="q-topic" id="q-topic">Topic</span>
+        <span class="multi-tag" id="multi-tag" style="display:none">Select All That Apply</span>
+      </div>
+      <div class="q-text" id="q-text"></div>
+      <div class="q-context" id="q-context" style="display:none"></div>
+      <div class="options-grid" id="options-grid"></div>
+      <div class="hint-panel" id="hint-panel"></div>
+      <div class="explanation-panel" id="explanation-panel">
+        <div class="exp-head" id="exp-head"></div>
+        <div id="exp-body"></div>
+      </div>
+      <div class="actions-row">
+        <button class="btn-hint" id="btn-hint" onclick="toggleHint()">Hint</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitAnswer()" disabled>Submit</button>
+        <button class="btn-next"   id="btn-next"   onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen" class="screen">
+    <div class="result-ring">
+      <svg viewBox="0 0 148 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="74" cy="74" r="68" stroke="#1f2430" stroke-width="8"/>
+        <circle cx="74" cy="74" r="68" stroke="url(#rg)" stroke-width="8"
+          stroke-linecap="round" stroke-dasharray="427"
+          id="result-arc" stroke-dashoffset="427"/>
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+            <stop offset="0%"   stop-color="#e8b84b"/>
+            <stop offset="100%" stop-color="#c9922a"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="score-num"   id="final-score-num">0</div>
+      <div class="score-denom" id="final-score-denom">/ —</div>
+    </div>
+
+    <h2 id="result-title">Well Done!</h2>
+    <p class="result-sub" id="result-sub">Here's how you performed.</p>
+
+    <div class="breakdown-grid">
+      <div class="breakdown-card bc-correct"><div class="bc-num" id="bc-correct">0</div><div class="bc-label">Correct</div></div>
+      <div class="breakdown-card bc-wrong">  <div class="bc-num" id="bc-wrong">0</div>  <div class="bc-label">Incorrect</div></div>
+      <div class="breakdown-card bc-pct">    <div class="bc-num" id="bc-pct">0%</div>   <div class="bc-label">Score</div></div>
+    </div>
+
+    <!-- Name / date / time attribution -->
+    <div class="result-attribution">
+      <div class="attr-icon">🎓</div>
+      <div>
+        <div class="attr-name" id="attr-name"></div>
+        <div class="attr-meta" id="attr-meta"></div>
+      </div>
+    </div>
+
+    <div class="cert-bar" id="cert-bar"></div>
+
+    <div class="review-list">
+      <h3>Review Your Answers</h3>
+      <div id="review-items"></div>
+    </div>
+
+    <button class="btn-restart" onclick="restartQuiz()">Try Again 🔄</button>
+  </div>
+
+</div><!-- /#app -->
+
+<script>
+// ═══════════════════════════════════════════════════════════════════════
+//  QUESTION BANK
+// ═══════════════════════════════════════════════════════════════════════
+const TEST_BANK = [
+  {
+    topic: "Customer Takeaways",
+    text: "Which three are important takeaways from customer observation? (Choose three)",
+    multi: true,
+    options: [
+      "You can't assume you know what customers need because everyone is different.",
+      "Customers get to know your company support team.",
+      "Customers will gain a deeper respect for your product or service.",
+      "You need to know how much people will pay for your product or service.",
+      "Observing and talking to customers gives us insights into problems or 'pain points' that we could help them solve.",
+      "Seeing other people struggling with problems motivates us to help them with an innovative solution."
+    ],
+    correct: [0, 4, 5],
+    hint: "Focus on empathy, pain points, and motivation from direct observation.",
+    explanation: "Key takeaways from customer observation include not assuming needs, identifying pain points, and feeling motivated to solve real problems. The other options are less central or not direct outcomes of observation."
+  },
+  {
+    topic: "Volunteer App Success",
+    text: "Your client runs a horse boarding stable that allows volunteers to clean stalls, feed and water horses in exchange for reduced board for their own horses. Tracking volunteer hours has been a challenge, so your team has developed an app to ease the burden of managing volunteers.\n\nYour client would like at least:\n- 100% of the volunteers to use the app for tracking their hours\n- 50% to use it for finding substitutes rather than phoning\n\nYou prepare to run a technical test.\n\nWhich two results indicate success? (Choose two)",
+    multi: true,
+    options: [
+      "90% of volunteers used the app for scheduling updates.",
+      "35% of volunteers used the app to find substitutes.",
+      "100% of the volunteers used the app to log their work hours.",
+      "60% of volunteers used the app to find substitutes.",
+      "70% of volunteers used the app to submit scheduling preferences."
+    ],
+    correct: [2, 3],
+    hint: "Success means meeting both targets: 100% for hour logging and at least 50% for finding substitutes.",
+    explanation: "The client's goals are 100% usage for logging hours and 50% for substitutes. Only '100% logged hours' and '60% found substitutes' meet or exceed these thresholds."
+  },
+  {
+    topic: "Next Steps Criteria",
+    text: "Your team has just finished evaluating test results.\n\nWhich two criteria should you consider when identifying the next steps? (Choose two)",
+    multi: true,
+    options: [
+      "Customer behavior and insights from the test.",
+      "Cost of implementation.",
+      "Marketing projections.",
+      "Number of test candidates.",
+      "Desired customer benefit."
+    ],
+    correct: [0, 4],
+    hint: "Focus on what you learned from customers and the value you aim to deliver.",
+    explanation: "Next steps should be driven by actual customer insights and the benefit you want to provide. Cost and marketing come later; candidate count alone is not a decision driver."
+  },
+  {
+    topic: "Rapid Experiment Questions",
+    text: "Which three are good questions to use during a Rapid Experiment with a Customer? (Choose three)",
+    multi: true,
+    options: [
+      "Was there anything confusing about the prototype?",
+      "Do you have any questions about the prototype?",
+      "Do you like this prototype?",
+      "Why aren't you using the prototype correctly?",
+      "What would the customer prefer for packaging, bundling, colors, sizes, pricing, etc.",
+      "How long did it take to implement the prototype?"
+    ],
+    correct: [0, 1, 5],
+    hint: "Good questions are open-ended, non-leading, and focus on usability and understanding, not preferences or blame.",
+    explanation: "Asking about confusion, questions, and implementation time yields actionable feedback. 'Do you like it?' is too vague; 'Why aren't you using correctly?' is accusatory; specific preferences are too detailed for a rapid experiment."
+  },
+  {
+    topic: "Customer Empathy",
+    text: "You own a business that creates gameware. You want to gain a deep customer empathy.\n\nWhat should you do?",
+    multi: false,
+    options: [
+      "Create a problem statement based on your issues creating different gameware.",
+      "Observe your customers to understand what problems they experience while playing the gameware.",
+      "Define an ideal customer state using input from your employees about their knowledge of gameware issues.",
+      "Based on problems your staff experienced while playing the gameware, brainstorm issues."
+    ],
+    correct: [1],
+    hint: "Empathy comes from directly observing and understanding the customer's real experience.",
+    explanation: "Deep customer empathy requires observing customers in their own context to see their problems firsthand. Internal issues or employee knowledge do not replace direct customer observation."
+  },
+  {
+    topic: "Empathy Map",
+    text: "How does an Empathy Map help identify the customer's challenge?",
+    multi: true,
+    options: [
+      "It connects a customer’s perspective to issues and their related emotions.",
+      "It identifies artifacts and environmental factors that influence a customer.",
+      "It explores relationships and tensions between goals, values, motivations, or other characteristics.",
+      "It probes more deeply into a problem or opportunity area."
+    ],
+    correct: [0, 1, 2, 3],
+    hint: "An Empathy Map captures multiple dimensions of the customer's experience.",
+    explanation: "All four options describe valid ways an Empathy Map helps identify customer challenges: connecting perspective to emotions, identifying environmental factors, exploring tensions, and probing deeper into problems."
+  },
+  {
+    topic: "Deep Customer Empathy",
+    text: "Identify which two goals are associated with the principle of Deep Customer Empathy? (Choose two)",
+    multi: true,
+    options: [
+      "Creating a Customer Problem Statement.",
+      "Creating the Ideal State Statement.",
+      "Whittling ideas to find the best solution.",
+      "Team collaboration to suggest multiple ideas.",
+      "Testing solutions."
+    ],
+    correct: [0, 1],
+    hint: "Deep Customer Empathy focuses on understanding the customer's current problem and their desired ideal state.",
+    explanation: "The two main goals are creating a Customer Problem Statement (understanding the pain) and creating an Ideal State Statement (envisioning the solution from the customer's perspective). The other options relate to ideation, selection, or testing, not empathy itself."
+  },
+  {
+    topic: "Purpose of Narrowing",
+    text: "What is the purpose of narrowing?",
+    multi: false,
+    options: [
+      "To create a Customer Problem Statement.",
+      "To create the Ideal State Statement.",
+      "Whittling ideas to find the solution with the best customer benefit.",
+      "Testing the hypothesis of one or more solutions."
+    ],
+    correct: [2],
+    hint: "Narrowing is about selecting the best idea based on customer value.",
+    explanation: "Narrowing means reducing many broad ideas down to the one that offers the greatest customer benefit. The other options describe different stages (problem definition, testing, etc.)."
+  },
+  {
+    topic: "Go Broad to Go Narrow",
+    text: "What are two good reasons to select an idea to try when you're using Go Broad to Go Narrow? (Choose two)",
+    multi: true,
+    options: [
+      "It has a high level of innovation and is a new approach to the problem.",
+      "It has a high level of competitiveness and is better than other products or services on the market.",
+      "It has a high likelihood of making a profit and it is a great business idea.",
+      "It has a high likelihood that it will delight the customer.",
+      "It is a great business idea that competitors haven't tried."
+    ],
+    correct: [0, 3],
+    hint: "Focus on innovation and customer delight, not just profit or competition.",
+    explanation: "During Go Broad to Go Narrow, the best reasons to select an idea are that it is highly innovative (new approach) and that it will delight the customer. Profitability and competition are less relevant at this early stage."
+  },
+  {
+    topic: "Customer Problem Statement",
+    text: "What are the components of a Customer Problem Statement?",
+    multi: false,
+    options: [
+      "In a perfect world, The biggest benefit to me is, Which makes me feel.",
+      "I am, I am trying, But, Because, Which makes me feel.",
+      "If we, Then, Which we will measure by, Success for this metric will be.",
+      "Fast Cycle Sketch Test, Fake-o Test, Concierge Test, Technical Test."
+    ],
+    correct: [1],
+    hint: "A Customer Problem Statement describes who the customer is, what they are trying to do, the obstacle, the cause, and the emotional impact.",
+    explanation: "The correct structure is 'I am [user], I am trying to [goal], But [barrier], Because [cause], Which makes me feel [emotion].' The other options describe ideal state statements, hypotheses, or test types."
+  },
+  {
+    topic: "Customer Insights",
+    text: "What is the best way to summarize what you learn while silently observing a customer using your product?",
+    multi: false,
+    options: [
+      "Use a Customer Safari Method card.",
+      "Implement Follow-Me-Home with an interviewer and a note-taker.",
+      "Use Zoom.",
+      "Write an Ideal State statement."
+    ],
+    correct: [0],
+    hint: "Think about a structured observation method that captures key insights.",
+    explanation: "Customer Safari is a lightweight observation method that helps you document what a customer does, says, thinks, and feels while using your product."
+  },
+  {
+    topic: "Customer Insights",
+    text: "Your customer's family-law firm has been rapidly expanding. Attorneys are currently working out of their home and the firm has had to hire additional staff to handle the increase in cases. They would like to diversify into tax law, but lack the facilities for further expansion. Their customer base is loyal and they have gained new customers through referrals.\n\nWhat is the customer's main pain point?",
+    multi: false,
+    options: [
+      "Increased legal costs.",
+      "Outgrown current facilities.",
+      "Can't gain new customers without referrals.",
+      "Too many cases."
+    ],
+    correct: [1],
+    hint: "Look for what is preventing them from growing or diversifying.",
+    explanation: "The firm cannot expand into tax law or add more staff because they have outgrown their current home-based facilities."
+  },
+  {
+    topic: "Customer Insights",
+    text: "Among these choices, which would be the most crucial assumption?",
+    multi: false,
+    options: [
+      "At least 30% of existing customers will connect with an accountant in our app.",
+      "Customer will connect with an accountant in our app.",
+      "We can build an app that will offer customers financial assistance.",
+      "We can make sizable profits by building an app."
+    ],
+    correct: [0],
+    hint: "The riskiest assumption often includes a specific, measurable threshold.",
+    explanation: "The assumption that at least 30% of customers will take action is more specific and testable than general assumptions about desire or feasibility."
+  },
+  {
+    topic: "Customer Insights",
+    text: "Which is not a component of an Ideal Customer State?",
+    multi: false,
+    options: [
+      "In a perfect world",
+      "I am trying",
+      "The biggest benefit to me is",
+      "Which makes me feel"
+    ],
+    correct: [1],
+    hint: "Ideal Customer State statements start with specific phrases that describe a perfect scenario, benefit, or emotion.",
+    explanation: "Ideal Customer State typically includes 'In a perfect world...', 'The biggest benefit to me is...', and 'Which makes me feel...' — not 'I am trying'."
+  },
+  {
+    topic: "Customer Insights",
+    text: "When implementing D4D principles, which three assumptions must be considered before conducting Rapid Experiments? (Choose three)",
+    multi: true,
+    options: [
+      "What is the exact cost?",
+      "Does the customer want it?",
+      "Is the customer smart enough to use it?",
+      "Can we sell it to other customers?",
+      "Can we build it?",
+      "Is it beneficial to the customer's business?"
+    ],
+    correct: [1, 4, 5],
+    hint: "Think about desirability, feasibility, and viability.",
+    explanation: "The three key assumptions are desirability (does the customer want it?), feasibility (can we build it?), and viability (is it beneficial to the customer's business?)."
+  },
+  {
+    topic: "Design for Delight",
+    text: "What is the purpose of brainstorming?",
+    multi: false,
+    options: [
+      "To allow idea contributions from all of your customers.",
+      "To work in a committee setting and allow one person to provide answers to the problem.",
+      "The purpose of brainstorming is to quickly generate lots of ideas from different perspectives.",
+      "To sort through several ideas to create a solution."
+    ],
+    correct: [2],
+    hint: "Think about generating quantity and variety, not evaluating early.",
+    explanation: "Brainstorming is meant to rapidly generate many diverse ideas from different perspectives without judgment."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Your team is presenting ideas that will delight a customer. You have an idea to propose.\n\nWhich two elements should you include in your representation to your team members? (Choose two)",
+    multi: true,
+    options: [
+      "How the solution works.",
+      "How to market the solution to new customers.",
+      "A profit analysis of the solution.",
+      "The benefit the customer will experience.",
+      "Feasibility metrics for the solution."
+    ],
+    correct: [0, 3],
+    hint: "Focus on what the solution does and why the customer would care.",
+    explanation: "When proposing an idea, clearly explain how the solution works and the specific benefit the customer will experience. Marketing, profit, and feasibility come later."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which would be the most appropriate situation to apply Design for Delight?",
+    multi: false,
+    options: [
+      "You want to create a blog to share your favorite music with other people.",
+      "You want to find innovative ways to help a local high school build a scholarship fund.",
+      "You need to follow industry standards to build a new game app.",
+      "You want approval to operate a shaved ice stand at your state junior soccer playoffs."
+    ],
+    correct: [1],
+    hint: "Design for Delight is used when you need deep empathy and creative problem solving.",
+    explanation: "D4D is ideal for solving complex, human-centered problems where innovation and customer delight matter, such as helping a school build a scholarship fund."
+  },
+  {
+    topic: "Design for Delight",
+    text: "When writing an Ideal Customer State, what are the components that should be included?",
+    multi: false,
+    options: [
+      "Fast Cycle Sketch Test, Fake-o Test, Concierge Test, Technical Test.",
+      "I am, I am trying, But, Because, Which makes me feel.",
+      "If we, Then, Which we will measure by, Success for this metric will be.",
+      "In a perfect world, The biggest benefit to me is, Which makes me feel."
+    ],
+    correct: [3],
+    hint: "Ideal Customer State describes a perfect scenario from the customer's perspective.",
+    explanation: "The correct components are 'In a perfect world...', 'The biggest benefit to me is...', and 'Which makes me feel...'."
+  },
+  {
+    topic: "Customer Insights",
+    text: "Which two are effective customer observation methods? (Choose two)",
+    multi: true,
+    options: [
+      "Customer Support Calls",
+      "Online Polls",
+      "Follow Me Home",
+      "Emailed survey",
+      "Customer Safari"
+    ],
+    correct: [2, 4],
+    hint: "Direct observation methods provide richer insights than surveys or polls.",
+    explanation: "Follow Me Home and Customer Safari are immersive observation methods that let you see customers using products in their real environment."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Identify the primary goal associated with the principle of Rapid Experiments with Customers.",
+    multi: false,
+    options: [
+      "Narrowing ideas to find the solution with the best customer benefit.",
+      "Creating a Customer Problem Statement and Ideal State Statement.",
+      "Brainstorming with team members to generate solution ideas.",
+      "Testing the hypothesis of one or more solutions."
+    ],
+    correct: [3],
+    hint: "Rapid experiments are about learning, not just generating ideas.",
+    explanation: "The primary goal is to test hypotheses quickly with real customers to validate or invalidate assumptions about a solution."
+  },
+  {
+    topic: "Customer Insights",
+    text: "From the customer's point of view, which three are components of a customer problem statement? (Choose three)",
+    multi: true,
+    options: [
+      "The customer's desired outcome.",
+      "Barriers to achieving the desired outcome.",
+      "Customer's attempted solutions to the problem.",
+      "The customer's emotional reaction to the problem.",
+      "Customer's hypothesis for a solution.",
+      "Test results tried by the customer."
+    ],
+    correct: [0, 1, 3],
+    hint: "Focus on what the customer wants, what stops them, and how they feel.",
+    explanation: "A customer problem statement typically includes the desired outcome, the barriers preventing it, and the emotional reaction caused by those barriers."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which best defines the principle of Rapid Experiments with Customers?",
+    multi: false,
+    options: [
+      "Testing the hypothesis of one or more solutions.",
+      "Identifying the customer's problem and the perfect outcome.",
+      "Brainstorming ideas then identifying the one that best benefits the customer.",
+      "Brainstorming ideas then identifying the one that best benefits the customer."
+    ],
+    correct: [0],
+    hint: "Rapid experiments are about validating assumptions through real customer feedback.",
+    explanation: "Rapid Experiments with Customers focuses on testing specific hypotheses quickly to learn what works, not just generating or ranking ideas."
+  },
+  {
+    topic: "Design for Delight",
+    text: "What are components of an ideal state statement? (Choose three)",
+    multi: true,
+    options: [
+      "The customer's desired outcome.",
+      "Barriers to achieving the desired outcome.",
+      "A future state that is borderline unachievable.",
+      "The customer's emotional reaction to the problem.",
+      "Improvement in the customer's life when the ideal state is achieved."
+    ],
+    correct: [2, 3, 4],
+    hint: "An ideal state describes a perfect scenario, the feeling, and the positive change.",
+    explanation: "Ideal State Statement includes a nearly unachievable future state, the customer's emotional reaction, and the improvement in their life — not the current problem or barriers."
+  },
+  {
+    topic: "Customer Insights",
+    text: "How does Customer Safari help identify the customer's challenge?",
+    multi: false,
+    options: [
+      "It connects a customer's perspective to issues and their related emotions.",
+      "It identifies artifacts and environmental factors that influence a customer.",
+      "It explores relationships and tensions between goals, values, motivations, or other characteristics.",
+      "It probes more deeply into a problem or opportunity area."
+    ],
+    correct: [1],
+    hint: "Customer Safari is about influencing.",
+    explanation: "Customer Safari focuses on observing the customer’s physical environment, artifacts, and contextual factors that shape their behavior and challenges"
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which two statements describe the purpose of narrowing? (Choose two)",
+    multi: true,
+    options: [
+      "To sort solution ideas and rank them.",
+      "To create a Customer Problem Statement.",
+      "To create the Ideal State Statement.",
+      "To whittle ideas to find the solution with the best customer benefit.",
+      "To brainstorm with team members to generate solution ideas."
+    ],
+    correct: [0, 3],
+    hint: "Narrowing is about filtering and focusing on the most valuable solutions.",
+    explanation: "Narrowing helps prioritize by sorting/ranking ideas and then whittling them down to the solution that delivers the greatest benefit to the customer."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which are two important reasons to test ideas? (Choose two)",
+    multi: true,
+    options: [
+      "To get evidence that will convince people that your idea is great.",
+      "To find out if the idea is something that customers will actually want.",
+      "To try out parts of an idea before investing a lot of time and money.",
+      "To determine the number of versions of a product or service must be developed, such as different colors, packages, or feature options.",
+      "To gather information for marketing."
+    ],
+    correct: [1, 2],
+    hint: "Testing is about learning and reducing risk, not just validation or marketing.",
+    explanation: "The key reasons are to validate customer desire and to test components cheaply before committing significant resources, avoiding building something nobody wants."
+  },
+  {
+    topic: "Design for Delight",
+    text: "You are in a brainstorming session with a group of five team members. The team is using looping.\n\nWhich of these is a looping concept?",
+    multi: false,
+    options: [
+      "Customer Safari",
+      "Go Narrow",
+      "Faster than Thought",
+      "Storyboarding"
+    ],
+    correct: [2],
+    hint: "Looping involves quickly generating and building on ideas.",
+    explanation: "Faster than Thought is a looping technique where participants rapidly share ideas without stopping to critique, keeping the energy high and building on each other's thoughts."
+  },
+  {
+    topic: "Customer Insights",
+    text: "Your client owns an event planning company. The business manually schedules staffing and resources for each contracted event. Business demand has been growing rapidly and this growth has created mistakes resulting in misdelivered resources and incorrect staff being assigned to events. Job descriptions and skillsets determine which employees are assigned to each event.\n\nYour team has an idea for a scheduling app to manage the events and staffing.\n\nWhich three assumptions must be true for the application to be successful? (Choose three)",
+    multi: true,
+    options: [
+      "Specific resources required for each event is accurate.",
+      "Staffing descriptions and skillsets are accurate.",
+      "Employee compensation is accurate.",
+      "There are adequate numbers of staff to cover each event.",
+      "The number of moving jobs requested increases.",
+      "Events will need to be pre-approved."
+    ],
+    correct: [0, 1, 3],
+    hint: "Think about the data and capacity needed for the app to work correctly.",
+    explanation: "The app relies on accurate resource requirements per event, accurate staff skills/descriptions, and having enough staff to assign. Compensation accuracy, increasing job volume, and pre-approval are not essential for the core scheduling functionality."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Among these choices, which would be the least proven assumption?",
+    multi: false,
+    options: [
+      "We must rely on the customer to run the experiment themselves.",
+      "Our staff is trained to run this experiment.",
+      "We can use an app that has been effective with other customers.",
+      "Our help desk is already trained to assist these types of customers."
+    ],
+    correct: [0],
+    hint: "Consider which assumption has the highest risk and least prior evidence.",
+    explanation: "Relying on customers to run experiments themselves is the least proven because you have little control over their follow-through, skill, or environment — unlike internal staff or existing tools which you can validate more easily."
+  },
+    {
+    topic: "Design for Delight",
+    text: "Which are two components that must be included in a Hypothesis Statement? (Choose three)",
+    multi: true,
+    options: [
+      "If we ... then",
+      "This is the problem ... and the solution.",
+      "Prediction ... analysis.",
+      "Which will be measured by these success metrics.",
+      "The customer will feel."
+    ],
+    correct: [0, 2, 3],
+    hint: "A hypothesis statement connects an action, a prediction, and a measurable outcome.",
+    explanation: "The three required components are: 'If we ... then' (the condition and expected result), 'Prediction ... analysis' (the specific hypothesis to test), and 'Which will be measured by these success metrics' (how you will know if it worked). 'The customer will feel' belongs to the Ideal Customer State, not the hypothesis statement."
+  },
+  {
+    topic: "Customer Insights",
+    text: "What is the best way to summarize what you learn and probe more deeply by interviewing a customer while they are using your product?",
+    multi: false,
+    options: [
+      "Use a Customer Safari Method card.",
+      "Implement Follow-Me-Home.",
+      "Use Zoom.",
+      "Write an Ideal State statement."
+    ],
+    correct: [1],
+    hint: "Observing and interviewing in the customer's natural environment gives rich insights.",
+    explanation: "Follow-Me-Home involves going to the customer's location to watch them use the product and ask questions in real time, allowing deep probing and contextual learning."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which two are methods of Narrowing? (Choose two)",
+    multi: true,
+    options: [
+      "2 x 2",
+      "7 to get 1",
+      "100 point",
+      "Remixing and building",
+      "Mash-up"
+    ],
+    correct: [0, 2],
+    hint: "Narrowing methods help you filter and prioritize ideas, not generate more.",
+    explanation: "Common narrowing techniques include the 2x2 matrix and '100 point'."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which criteria must be met for an assumption to be considered a 'Leap of Faith' Assumption?",
+    multi: false,
+    options: [
+      "The assumption is the least expensive.",
+      "The assumption is most crucial for the experiment to succeed, and it has not yet been proven true in practice elsewhere.",
+      "The assumption is the easiest to implement.",
+      "The assumption is a popular and already proven successful."
+    ],
+    correct: [1],
+    hint: "A Leap of Faith assumption is both critical and untested.",
+    explanation: "A 'Leap of Faith' assumption is the riskiest one — it is essential for your solution to work, but you have no evidence yet to confirm it. Cost, ease, or popularity are not the defining factors."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Identify which two goals are associated with the principle of Go Broad to Go Narrow? (Choose two)",
+    multi: true,
+    options: [
+      "Creating a Customer Problem Statement.",
+      "Creating the Ideal State Statement.",
+      "Whittling ideas to find the solution with the best customer benefit.",
+      "Brainstorming with team members to generate solution ideas.",
+      "Testing the hypothesis of one or more solutions."
+    ],
+    correct: [2, 3],
+    hint: "Go Broad to Go Narrow has two phases: generate many ideas, then reduce to the best.",
+    explanation: "The 'Go Broad' phase involves brainstorming to generate many solution ideas. The 'Go Narrow' phase involves whittling those ideas down to the one that delivers the best customer benefit. Problem statements, ideal states, and hypothesis testing are separate activities."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Your team used a Concierge Test to observe employees manually implementing a new procedure before your team automates it.\n\nWhich should be considered to identify next steps?",
+    multi: false,
+    options: [
+      "Number of test candidates.",
+      "Cost of implementation.",
+      "Marketing projections."
+    ],
+    correct: [1],
+    hint: "After a concierge test, focus on whether automating is worth the investment.",
+    explanation: "The concierge test validates the procedure manually; the next step is to evaluate the cost of implementing automation. The number of test candidates and marketing projections are secondary to feasibility and ROI."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which two are Requirements of a Successful Experiment? (Choose two)",
+    multi: true,
+    options: [
+      "Addresses the customer's problem.",
+      "Repurposes customer's resources.",
+      "Repurposes customer's resources.",
+      "Repurposes customer's resources.",
+      "Delivers a customer benefit."
+    ],
+    correct: [0, 4],
+    hint: "A good experiment must solve a real problem and create value for the customer.",
+    explanation: "Successful experiments are built around addressing an actual customer problem and delivering a clear benefit to that customer. Repurposing resources may be a tactic, not a requirement."
+  },
+  {
+    topic: "Design for Delight",
+    text: "You have an idea to propose to your team that you believe will delight your customer and help resolve the customer's problem.\n\nWhich two elements should you include in your representation? (Choose two)",
+    multi: true,
+    options: [
+      "How to market the solution to new customers.",
+      "A profit analysis of the solution.",
+      "The customer experiencing the problem.",
+      "How the customer discovers your solution.",
+      "Feasibility metrics for the solution."
+    ],
+    correct: [2, 3],
+    hint: "Focus on empathy and the customer journey, not internal business metrics.",
+    explanation: "When proposing an idea to delight customers, include the customer experiencing the problem (to build empathy and context) and how the customer discovers your solution (to show the intended experience). Marketing, profit, and feasibility come later."
+  },
+  {
+    topic: "Customer Insights",
+    text: "Your team did a Follow-Me-Home with several customers and observed repeated workarounds to accomplish a task your software can do with a built-feature released in the last version. Your team also observed customer frustration performing the workaround.\n\nWhich is the most important result of these customer observations?",
+    multi: false,
+    options: [
+      "Watching the ways your customers deal with frustration.",
+      "Learning that your software is not functioning correctly.",
+      "Discovering customers aren't aware of the new features in your software."
+    ],
+    correct: [2],
+    hint: "The key insight is about awareness, not just frustration or software bugs.",
+    explanation: "Since the software already has the feature, the most important finding is that customers don't know it exists. This points to a gap in onboarding, communication, or discoverability — not a functional problem."
+  },
+  {
+    topic: "Design for Delight",
+    text: "Which two are best practices your team should follow for Narrowing? (Choose two)",
+    multi: true,
+    options: [
+      "Narrow down the ideas by evaluating customer benefit versus feasibility.",
+      "Conduct a deep probing interview with the client to determine their preferences.",
+      "You should change your criteria if your first attempt to narrow ideas is not working.",
+      "Select the idea your team can most easily implement.",
+      "Conduct rapid prototyping on each idea to determine which is best."
+    ],
+    correct: [0, 2],
+    hint: "Narrowing requires objective trade-offs and flexibility in criteria.",
+    explanation: "Best practices include comparing ideas on customer benefit vs. feasibility (a classic 2x2 approach) and being willing to adjust your criteria if the first narrowing attempt fails. Avoid picking the easiest idea or prototyping every idea (that's testing, not narrowing)."
+  },
+  {
+    topic: "Design for Delight",
+    text: "What is the goal of brainstorming?",
+    multi: false,
+    options: [
+      "To quickly generate lots of ideas from different perspectives.",
+      "To sort through several ideas to create a solution.",
+      "To work in a committee setting and allow one person to provide answers to the problem.",
+      "To work in a committee setting and allow one person to provide answers to the problem."
+    ],
+    correct: [0],
+    hint: "Brainstorming prioritizes quantity and diversity, not evaluation.",
+    explanation: "The goal of brainstorming is rapid, high-volume idea generation from multiple perspectives, deferring judgment and sorting for later stages."
+  },
+  {
+    topic: "Design for Delight",
+    text: "What are the components of an Ideal Customer State?",
+    multi: false,
+    options: [
+      "In a perfect world, The biggest benefit to me is, Which makes me feel.",
+      "I am, I am trying, But, Because, Which makes me feel.",
+      "If we, Then, Which we will measure by, Success for this metric will be.",
+      "Fast Cycle Sketch Test, Fake-o Test, Concierge Test, Technical Test."
+    ],
+    correct: [0],
+    hint: "Ideal Customer State describes a perfect scenario, benefit, and emotion.",
+    explanation: "The correct components are 'In a perfect world...', 'The biggest benefit to me is...', and 'Which makes me feel...' — capturing the ideal outcome from the customer's perspective."
+  }
+];
+
+// ═══════════════════════════════════════════════════════════════════════
+//  ROTATION CONFIG
+//  90% of the bank is dealt each session; the other ~10% sit out.
+//  Which questions sit out is random — every session is a fresh draw.
+// ═══════════════════════════════════════════════════════════════════════
+const SESSION_RATIO = 0.9;
+const SESSION_SIZE  = Math.round(TEST_BANK.length * SESSION_RATIO);
+
+// ── State ──────────────────────────────────────────────────────────────
+let SESSION_QUESTIONS = [];
+let currentQ          = 0;
+let score             = 0;
+let selectedOptions   = [];
+let answered          = false;
+let userAnswers       = [];
+let playerName        = '';
+let attemptTime       = null;
+
+// ── Init welcome stat pills ────────────────────────────────────────────
+(function initStats() {
+  document.getElementById('stat-bank-count').textContent    = TEST_BANK.length;
+  document.getElementById('stat-session-count').textContent = SESSION_SIZE;
+})();
+
+// ── Fisher-Yates shuffle ───────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function startQuiz() {
+  const nameInput = document.getElementById('player-name');
+  const nameErr   = document.getElementById('name-error');
+  playerName = nameInput.value.trim();
+  if (!playerName) { nameErr.classList.add('show'); nameInput.focus(); return; }
+  nameErr.classList.remove('show');
+
+  attemptTime = new Date();
+
+  // TRUE ROTATION: shuffle full bank, deal first SESSION_SIZE
+  SESSION_QUESTIONS = shuffle(TEST_BANK).slice(0, SESSION_SIZE);
+
+  currentQ = 0; score = 0; userAnswers = [];
+  document.getElementById('q-total').textContent = SESSION_QUESTIONS.length;
+  document.getElementById('welcome-screen').classList.remove('active');
+  document.getElementById('quiz-screen').classList.add('active');
+  renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function renderQuestion() {
+  const q = SESSION_QUESTIONS[currentQ];
+  answered = false; selectedOptions = [];
+
+  document.getElementById('q-num').textContent  = currentQ + 1;
+  document.getElementById('progress-fill').style.width = ((currentQ / SESSION_QUESTIONS.length) * 100) + '%';
+  document.getElementById('live-score').textContent    = score;
+  document.getElementById('q-topic').textContent       = q.topic || 'General';
+  document.getElementById('q-text').textContent        = q.text;
+  document.getElementById('multi-tag').style.display   = q.multi ? 'inline-block' : 'none';
+
+  const ctx = document.getElementById('q-context');
+  if (q.context) { ctx.style.display = 'block'; ctx.textContent = q.context; } else ctx.style.display = 'none';
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  ['A','B','C','D','E','F'].slice(0, q.options.length).forEach((letter, i) => {
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML = `<div class="opt-letter">${letter}</div><div style="flex:1">${q.options[i]}</div><div class="opt-check"></div>`;
+    el.addEventListener('click', () => toggleOption(i, el, q.multi));
+    grid.appendChild(el);
+  });
+
+  // Reset hint — hide panel AND reset button appearance
+  const hintPanel = document.getElementById('hint-panel');
+  hintPanel.classList.remove('show');
+  hintPanel.textContent = '';
+  document.getElementById('btn-hint').classList.remove('hint-active');
+
+  document.getElementById('explanation-panel').classList.remove('show','correct-exp','incorrect-exp');
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-submit').style.display = '';
+  document.getElementById('btn-next').classList.remove('show');
+
+  const card = document.querySelector('.q-card');
+  card.style.animation = 'none'; card.offsetHeight; card.style.animation = 'fadeIn 0.35s ease';
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function toggleOption(i, el, multi) {
+  if (answered) return;
+  if (multi) {
+    if (selectedOptions.includes(i)) { selectedOptions = selectedOptions.filter(x => x !== i); el.classList.remove('selected'); }
+    else { selectedOptions.push(i); el.classList.add('selected'); }
+  } else {
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    selectedOptions = [i]; el.classList.add('selected');
+  }
+  document.getElementById('btn-submit').disabled = selectedOptions.length === 0;
+}
+
+// ── HINT TOGGLE: show ↔ hide ───────────────────────────────────────────
+function toggleHint() {
+  const panel  = document.getElementById('hint-panel');
+  const btn    = document.getElementById('btn-hint');
+  const isOpen = panel.classList.contains('show');
+
+  if (isOpen) {
+    // Hide hint
+    panel.classList.remove('show');
+    btn.classList.remove('hint-active');
+  } else {
+    // Show hint
+    panel.textContent = SESSION_QUESTIONS[currentQ].hint;
+    panel.classList.add('show');
+    btn.classList.add('hint-active');
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function submitAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q         = SESSION_QUESTIONS[currentQ];
+  const isCorrect = arraysMatch(selectedOptions.slice().sort(), [...q.correct].sort());
+  if (isCorrect) score++;
+  userAnswers.push({ idx: currentQ, selected: [...selectedOptions], isCorrect });
+
+  document.querySelectorAll('.opt').forEach((el, i) => {
+    el.classList.add('locked');
+    if (q.correct.includes(i))       { el.classList.add('correct');   el.querySelector('.opt-check').textContent = '✓'; }
+    else if (selectedOptions.includes(i)) { el.classList.add('incorrect'); el.querySelector('.opt-check').textContent = '✗'; }
+  });
+
+  const expPanel = document.getElementById('explanation-panel');
+  expPanel.classList.remove('correct-exp','incorrect-exp');
+  expPanel.classList.add('show', isCorrect ? 'correct-exp' : 'incorrect-exp');
+  document.getElementById('exp-head').textContent = isCorrect ? '✓ Correct!' : '✗ Not Quite';
+  document.getElementById('exp-body').textContent = q.explanation;
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('live-score').textContent   = score;
+  document.getElementById('btn-next').classList.add('show');
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= SESSION_QUESTIONS.length) showResults(); else renderQuestion();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function showResults() {
+  document.getElementById('quiz-screen').classList.remove('active');
+  document.getElementById('result-screen').classList.add('active');
+
+  const total = SESSION_QUESTIONS.length;
+  const pct   = Math.round((score / total) * 100);
+
+  document.getElementById('final-score-num').textContent   = score;
+  document.getElementById('final-score-denom').textContent = '/ ' + total;
+  document.getElementById('bc-correct').textContent        = score;
+  document.getElementById('bc-wrong').textContent          = total - score;
+  document.getElementById('bc-pct').textContent            = pct + '%';
+
+  setTimeout(() => {
+    const arc = document.getElementById('result-arc');
+    arc.style.transition       = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';
+    arc.style.strokeDashoffset = 2 * Math.PI * 68 * (1 - score / total);
+  }, 200);
+
+  // Attribution — name + date + time
+  const dateStr = attemptTime.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' });
+  const timeStr = attemptTime.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+  document.getElementById('attr-name').textContent = playerName;
+  document.getElementById('attr-meta').innerHTML   = `📅 ${dateStr}<br>🕐 ${timeStr}`;
+
+  let title, sub, icon, certMsg;
+  if      (pct >= 85) { title='🏆 Outstanding!';         sub='You are well-prepared for the D4D certification exam!';             icon='🎓'; certMsg="Excellent work! Your score suggests you're ready to sit the official D4D certification exam. Review any missed questions and you'll be set."; }
+  else if (pct >= 70) { title='⭐ Great Job!';             sub="Solid performance — a little more review and you'll be exam-ready."; icon='📈'; certMsg='Good foundation! Focus on reviewing your incorrect answers and the topics you found challenging. One more practice round should do it.'; }
+  else if (pct >= 50) { title='💪 Keep Going!';           sub="You know the basics — now it's time to solidify your understanding."; icon='📚'; certMsg='Keep studying! Review the explanations for missed questions and revisit the core D4D topics. Practice makes perfect.'; }
+  else                { title='🌱 Just Getting Started'; sub='Every expert was once a beginner. Review and try again!';            icon='🔍'; certMsg="Don't be discouraged! Read through all the explanations carefully and try again. The key concepts will start clicking with more exposure."; }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent   = sub;
+  document.getElementById('cert-bar').innerHTML =
+    `<div class="cert-icon">${icon}</div><div><h4>Certification Readiness</h4><p>${certMsg}</p></div>`;
+
+  const reviewEl = document.getElementById('review-items');
+  reviewEl.innerHTML = '';
+  const letters = ['A','B','C','D','E','F'];
+  userAnswers.forEach((ua, n) => {
+    const q = SESSION_QUESTIONS[ua.idx];
+    const el = document.createElement('div');
+    el.className = 'review-item';
+    el.innerHTML = `
+      <div class="ri-dot ${ua.isCorrect ? 'right' : 'wrong'}"></div>
+      <div class="ri-q">
+        <strong>Q${n+1}:</strong> ${q.text.slice(0,70)}…
+        ${!ua.isCorrect ? `<br><span class="ri-correct-ans">Correct: ${q.correct.map(i=>letters[i]).join(', ')}</span>` : ''}
+      </div>
+      <div class="ri-ans">Your answer: ${ua.selected.map(i=>letters[i]).join(', ')}</div>
+    `;
+    reviewEl.appendChild(el);
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+function restartQuiz() {
+  document.getElementById('result-screen').classList.remove('active');
+  const arc = document.getElementById('result-arc');
+  arc.style.transition = 'none'; arc.style.strokeDashoffset = 427;
+  document.getElementById('player-name').value = '';
+  document.getElementById('name-error').classList.remove('show');
+  document.getElementById('welcome-screen').classList.add('active');
+}
+
+function arraysMatch(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+</script>
+</body>
+</html>
