@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>WP Certification Quiz — WordPress</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c23;
+    --border: #1f2430;
+    --gold: #e8b84b;
+    --gold-dim: #a07d2a;
+    --gold-glow: rgba(232,184,75,0.18);
+    --text: #eef0f5;
+    --text-dim: #7b8299;
+    --green: #3ecf7a;
+    --green-bg: rgba(62,207,122,0.12);
+    --red: #f26c6c;
+    --red-bg: rgba(242,108,108,0.12);
+    --blue: #5b9cf6;
+    --blue-bg: rgba(91,156,246,0.12);
+    --radius: 14px;
+    --shadow: 0 8px 48px rgba(0,0,0,0.55);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 20% 10%, rgba(232,184,75,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 80% 85%, rgba(91,156,246,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  #app {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 780px;
+    padding: 20px;
+  }
+
+  /* ── SCREENS ── */
+  .screen { display: none; animation: fadeIn 0.45s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity:0; transform: translateY(18px); } to { opacity:1; transform: translateY(0); } }
+
+  /* ── WELCOME ── */
+  #welcome-screen {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .logo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-glow);
+    border: 1px solid rgba(232,184,75,0.3);
+    border-radius: 100px;
+    padding: 6px 18px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+  .logo-badge::before { content: '◆'; font-size: 9px; }
+
+  #welcome-screen h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    line-height: 1.12;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, #fff 30%, var(--gold));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  #welcome-screen p.subtitle {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 480px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 44px;
+  }
+  .stat-pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 22px;
+    text-align: center;
+  }
+  .stat-pill .num { font-family: 'DM Mono', monospace; font-size: 1.5rem; color: var(--gold); font-weight: 500; }
+  .stat-pill .label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 2px; }
+
+  /* ── NAME INPUT ── */
+  .name-input-wrap {
+    max-width: 360px;
+    margin: 0 auto 28px;
+    text-align: left;
+  }
+  .name-input-wrap label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+  }
+  .name-input-wrap input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 18px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .name-input-wrap input::placeholder { color: var(--text-dim); }
+  .name-input-wrap input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(232,184,75,0.12);
+  }
+  .name-error {
+    color: var(--red);
+    font-size: 0.78rem;
+    margin-top: 6px;
+    display: none;
+  }
+  .name-error.show { display: block; }
+
+  .btn-start {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 100px;
+    padding: 16px 52px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    letter-spacing: 0.04em;
+    transition: transform 0.18s, box-shadow 0.18s, filter 0.18s;
+    box-shadow: 0 4px 28px rgba(232,184,75,0.35);
+  }
+  .btn-start:hover { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 8px 36px rgba(232,184,75,0.48); }
+
+  .tip-box {
+    margin-top: 36px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 22px;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .tip-box strong { color: var(--gold); }
+
+  /* ── QUIZ ── */
+  #quiz-screen { padding: 10px 0; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 14px;
+  }
+  .q-counter {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .q-counter span { color: var(--gold); font-weight: 600; }
+
+  .progress-track {
+    flex: 1;
+    height: 5px;
+    background: var(--surface2);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    border-radius: 100px;
+    transition: width 0.5s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .score-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.78rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 5px 12px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+  .score-badge .pts { color: var(--green); font-weight: 600; }
+
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 32px 34px;
+    box-shadow: var(--shadow);
+    position: relative;
+    overflow: hidden;
+  }
+  .q-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0.5;
+  }
+
+  .q-topic {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: var(--gold-glow);
+    border: 1px solid rgba(232,184,75,0.2);
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin-bottom: 16px;
+  }
+
+  .multi-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--blue);
+    background: var(--blue-bg);
+    border: 1px solid rgba(91,156,246,0.3);
+    border-radius: 6px;
+    padding: 4px 10px;
+    margin-bottom: 16px;
+    margin-left: 8px;
+  }
+
+  .q-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    line-height: 1.55;
+    margin-bottom: 8px;
+    font-weight: 700;
+  }
+
+  .q-context {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    padding: 14px 16px;
+    background: var(--surface2);
+    border-radius: 10px;
+    border-left: 3px solid var(--gold-dim);
+  }
+
+  .options-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .opt {
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    transition: border-color 0.18s, background 0.18s, transform 0.12s;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    user-select: none;
+  }
+  .opt:hover:not(.locked) {
+    border-color: var(--gold-dim);
+    background: rgba(232,184,75,0.06);
+    transform: translateX(3px);
+  }
+  .opt.selected {
+    border-color: var(--gold);
+    background: var(--gold-glow);
+  }
+  .opt.correct {
+    border-color: var(--green) !important;
+    background: var(--green-bg) !important;
+  }
+  .opt.incorrect {
+    border-color: var(--red) !important;
+    background: var(--red-bg) !important;
+  }
+  .opt.locked { cursor: default; }
+
+  .opt-letter {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    min-width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.18s, color 0.18s, border-color 0.18s;
+  }
+  .opt.selected .opt-letter { background: var(--gold); color: #0a0a0a; border-color: var(--gold); }
+  .opt.correct .opt-letter { background: var(--green); color: #fff; border-color: var(--green); }
+  .opt.incorrect .opt-letter { background: var(--red); color: #fff; border-color: var(--red); }
+
+  .opt-check {
+    margin-left: auto;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .actions-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-hint {
+    background: none;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    padding: 10px 20px;
+    color: var(--text-dim);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.18s, color 0.18s, opacity 0.18s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .btn-hint:hover:not(:disabled) { border-color: var(--gold-dim); color: var(--gold); }
+  .btn-hint::before { content: '💡'; font-size: 0.95rem; }
+  .btn-hint:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  .btn-submit {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 100px;
+    padding: 12px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.18s, filter 0.18s, box-shadow 0.18s;
+    box-shadow: 0 3px 18px rgba(232,184,75,0.3);
+  }
+  .btn-submit:hover:not(:disabled) { transform: translateY(-1px); filter: brightness(1.08); }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .btn-next {
+    background: var(--surface2);
+    color: var(--text);
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    padding: 12px 36px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    display: none;
+    margin-left: auto;
+  }
+  .btn-next:hover { border-color: var(--gold); background: var(--gold-glow); }
+  .btn-next.show { display: flex; align-items: center; gap: 6px; }
+  .btn-next::after { content: '→'; }
+
+  .hint-panel {
+    background: var(--surface2);
+    border: 1px solid rgba(91,156,246,0.3);
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-top: 14px;
+    font-size: 0.87rem;
+    color: var(--blue);
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .hint-panel.show { display: block; }
+  .hint-panel::before { content: '💡 Hint: '; font-weight: 700; }
+
+  .explanation-panel {
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin-top: 14px;
+    font-size: 0.87rem;
+    line-height: 1.65;
+    display: none;
+    animation: fadeIn 0.3s ease;
+  }
+  .explanation-panel.correct-exp {
+    background: var(--green-bg);
+    border: 1px solid rgba(62,207,122,0.3);
+    color: #a8f0c6;
+  }
+  .explanation-panel.incorrect-exp {
+    background: var(--red-bg);
+    border: 1px solid rgba(242,108,108,0.3);
+    color: #f7b3b3;
+  }
+  .explanation-panel.show { display: block; }
+  .explanation-panel .exp-head {
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 5px;
+  }
+
+  /* ── RESULT ── */
+  #result-screen { text-align: center; padding: 50px 20px; }
+
+  .result-ring {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 4px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 0 auto 28px;
+    position: relative;
+    background: var(--surface);
+  }
+  .result-ring svg {
+    position: absolute; inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    transform: rotate(-90deg);
+  }
+  .result-ring .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    color: var(--gold);
+    line-height: 1;
+  }
+  .result-ring .score-denom { font-size: 0.78rem; color: var(--text-dim); margin-top: 2px; }
+
+  #result-screen h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+  #result-screen .result-sub { color: var(--text-dim); margin-bottom: 36px; }
+
+  /* ── PLAYER NAME BANNER ── */
+  .player-banner {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--gold-glow);
+    border: 1px solid rgba(232,184,75,0.25);
+    border-radius: 100px;
+    padding: 8px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  .player-banner::before { content: '👤'; }
+
+  /* ── TIMESTAMP CARD ── */
+  .timestamp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    font-family: 'DM Mono', monospace;
+  }
+  .timestamp-card::before { content: '🕐'; font-size: 1rem; }
+
+  .breakdown-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .breakdown-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+  }
+  .breakdown-card .bc-num { font-family: 'DM Mono', monospace; font-size: 1.6rem; font-weight: 600; }
+  .breakdown-card .bc-label { font-size: 0.72rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.07em; margin-top: 3px; }
+  .bc-correct .bc-num { color: var(--green); }
+  .bc-wrong .bc-num { color: var(--red); }
+  .bc-pct .bc-num { color: var(--gold); }
+
+  .cert-bar {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 24px;
+    margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    text-align: left;
+  }
+  .cert-icon { font-size: 2rem; flex-shrink: 0; }
+  .cert-bar h4 { font-size: 0.95rem; font-weight: 600; margin-bottom: 3px; }
+  .cert-bar p { font-size: 0.82rem; color: var(--text-dim); line-height: 1.5; }
+
+  .btn-restart {
+    background: linear-gradient(135deg, var(--gold), #c9922a);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 100px;
+    padding: 14px 44px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 22px rgba(232,184,75,0.35);
+    transition: transform 0.18s, filter 0.18s;
+  }
+  .btn-restart:hover { transform: translateY(-2px); filter: brightness(1.08); }
+
+  .review-list { text-align: left; margin-bottom: 32px; }
+  .review-list h3 { font-family: 'Playfair Display', serif; font-size: 1.1rem; margin-bottom: 14px; color: var(--text-dim); }
+  .review-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    font-size: 0.85rem;
+    line-height: 1.45;
+  }
+  .review-item .ri-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+  .ri-dot.right { background: var(--green); }
+  .ri-dot.wrong { background: var(--red); }
+  .review-item .ri-q { flex: 1; }
+  .review-item .ri-ans { color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 0.78rem; }
+  .ri-correct-ans { color: var(--green); font-size: 0.78rem; font-family: 'DM Mono', monospace; }
+
+  @media (max-width: 500px) {
+    .q-card { padding: 22px 18px; }
+    .breakdown-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .breakdown-card { padding: 12px; }
+    .breakdown-card .bc-num { font-size: 1.3rem; }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- WELCOME -->
+  <div id="welcome-screen" class="screen active">
+    <div class="logo-badge">WP Certification Prep</div>
+    <h1>WordPress<br/>Certification</h1>
+    <p class="subtitle">Master the concepts, terminology, and frameworks you need to pass the WP certification exam — one question at a time.</p>
+    <div class="stats-row">
+      <div class="stat-pill">
+        <div class="num" id="total-q-display">—</div>
+        <div class="label">Questions</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">💡</div>
+        <div class="label">Hints &amp; Tips</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">🔀</div>
+        <div class="label">Shuffled</div>
+      </div>
+    </div>
+
+    <!-- NAME INPUT -->
+    <div class="name-input-wrap">
+      <label for="player-name">Your Name</label>
+      <input type="text" id="player-name" placeholder="Enter your name to begin…" maxlength="50" autocomplete="off" />
+      <div class="name-error" id="name-error">Please enter your name before starting.</div>
+    </div>
+
+    <button class="btn-start" onclick="startQuiz()">Begin the Challenge</button>
+    <div class="tip-box">
+      <strong>How it works:</strong> Questions are shuffled every session and a small subset is hidden to keep things fresh. Use the hint button if you're stuck, then read the explanation after each answer. Questions marked <em>Select All That Apply</em> may have multiple correct answers!
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-screen" class="screen">
+    <div class="top-bar">
+      <div class="q-counter">Question <span id="q-num">1</span> / <span id="q-total">0</span></div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+      <div class="score-badge">Score: <span class="pts" id="live-score">0</span></div>
+    </div>
+
+    <div class="q-card">
+      <div id="q-tags">
+        <span class="q-topic" id="q-topic">Topic</span>
+        <span class="multi-tag" id="multi-tag" style="display:none">Select All That Apply</span>
+      </div>
+      <div class="q-text" id="q-text">Question text</div>
+      <div class="q-context" id="q-context" style="display:none"></div>
+      <div class="options-grid" id="options-grid"></div>
+      <div class="hint-panel" id="hint-panel"></div>
+      <div class="explanation-panel" id="explanation-panel">
+        <div class="exp-head" id="exp-head"></div>
+        <div id="exp-body"></div>
+      </div>
+      <div class="actions-row">
+        <button class="btn-hint" id="btn-hint" onclick="showHint()">Hint</button>
+        <button class="btn-submit" id="btn-submit" onclick="submitAnswer()" disabled>Submit</button>
+        <button class="btn-next" id="btn-next" onclick="nextQuestion()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULT -->
+  <div id="result-screen" class="screen">
+    <div class="player-banner" id="player-banner">Player</div>
+    <div class="result-ring">
+      <svg viewBox="0 0 148 148" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="74" cy="74" r="68" stroke="#1f2430" stroke-width="8"/>
+        <circle cx="74" cy="74" r="68" stroke="url(#rg)" stroke-width="8"
+          stroke-linecap="round"
+          stroke-dasharray="427"
+          id="result-arc"
+          stroke-dashoffset="427"/>
+        <defs>
+          <linearGradient id="rg" x1="0" y1="0" x2="148" y2="148" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#e8b84b"/>
+            <stop offset="100%" stop-color="#c9922a"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="score-num" id="final-score-num">0</div>
+      <div class="score-denom" id="final-score-denom">/ 0</div>
+    </div>
+    <h2 id="result-title">Well Done!</h2>
+    <p class="result-sub" id="result-sub">Here's how you performed.</p>
+    <div class="timestamp-card" id="timestamp-card">Loading…</div>
+    <div class="breakdown-grid">
+      <div class="breakdown-card bc-correct">
+        <div class="bc-num" id="bc-correct">0</div>
+        <div class="bc-label">Correct</div>
+      </div>
+      <div class="breakdown-card bc-wrong">
+        <div class="bc-num" id="bc-wrong">0</div>
+        <div class="bc-label">Incorrect</div>
+      </div>
+      <div class="breakdown-card bc-pct">
+        <div class="bc-num" id="bc-pct">0%</div>
+        <div class="bc-label">Score</div>
+      </div>
+    </div>
+    <div class="cert-bar" id="cert-bar"></div>
+    <div class="review-list">
+      <h3>Review Your Answers</h3>
+      <div id="review-items"></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">Try Again 🔄</button>
+  </div>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+//  QUESTION BANK
+// ─────────────────────────────────────────────
+const ALL_QUESTIONS = [
+  {
+    topic: "WordPress",
+    text: "What is the critical effect of well-crafted prompts in optimizing WordPress usage?",
+    multi: false,
+    options: [
+      "Automatically updates WordPress to the latest version",
+      "Leads to higher traffic by using fewer resources",
+      "Optimizes images without user intervention",
+      "Enables precise AI-generated solutions tailored to specific needs"
+    ],
+    correct: [3],
+    hint: "Think about how prompts guide AI to produce specific, useful outputs.",
+    explanation: "Well-crafted prompts allow AI to understand your exact requirements, leading to tailored solutions that fit your WordPress needs, rather than generic or incorrect outputs."
+  },
+  {
+    topic: "WordPress",
+    text: "Identify the correct sequence of actions to guide the iterative workflow in WordPress with AI assistance. Select all valid options.",
+    multi: true,
+    options: [
+      "Publish directly without staging",
+      "Generate first drafts with AI-driven templates",
+      "Iteratively refine content using AI evaluations",
+      "Perform final tests and improvements in a staging environment",
+      "Ignore AI feedback if initial draft looks complete"
+    ],
+    correct: [1, 2, 3],
+    hint: "Look for steps that involve AI assistance, iteration, and safe testing before going live.",
+    explanation: "An effective AI-assisted workflow starts with AI-generated drafts, then iterative refinement using AI feedback, and finally testing in a staging environment before publishing. Direct publishing or ignoring feedback increases risk."
+  },
+  {
+    topic: "WordPress",
+    text: "What is the primary role of plugins in a WordPress website?",
+    multi: false,
+    options: [
+      "Host websites on external servers",
+      "Modify core WordPress files",
+      "Optimize database queries",
+      "Add new features and functionalities"
+    ],
+    correct: [3],
+    hint: "Plugins extend what WordPress can do without changing core code.",
+    explanation: "Plugins are primarily used to add new features and functionalities to a WordPress site, such as contact forms, SEO tools, e-commerce capabilities, and more, without modifying the core WordPress files."
+  },
+  {
+    topic: "WordPress",
+    text: "Why is crafting well-defined prompts crucial when developing a WordPress theme?",
+    multi: false,
+    options: [
+      "To add more animations to the theme.",
+      "To provide higher chances of aligning development with user expectations.",
+      "To support only mobile view designs.",
+      "To facilitate seamless theme updates."
+    ],
+    correct: [1],
+    hint: "Clear prompts help AI or developers understand exactly what users need.",
+    explanation: "Well-defined prompts ensure that the generated theme or code matches user requirements closely, reducing misunderstandings and rework, and increasing alignment with what users actually expect."
+  },
+  {
+    topic: "WordPress",
+    text: "In the context of WordPress design, how should content hierarchy be determined to enhance user experience and engagement? Select all accurate strategies.",
+    multi: true,
+    options: [
+      "Place the most visually attractive elements first, regardless of importance",
+      "Organize information based on user value and priorities",
+      "Focus only on SEO keywords placement",
+      "Use headings, subheadings, and bullet points to create structure"
+    ],
+    correct: [1, 3],
+    hint: "Think about usability and scannability, not just visuals or SEO.",
+    explanation: "Effective content hierarchy prioritizes user needs (organizing by value/priority) and uses clear structural elements like headings and bullet points to make content easy to scan. Visual attractiveness alone or keyword stuffing do not improve user experience."
+  },
+  {
+    topic: "WordPress",
+    text: "Why is it important to craft effective prompts in managing e-commerce checkout processes in WordPress? Select all correct answers.",
+    multi: true,
+    options: [
+      "To provide personalized product recommendations during checkout",
+      "To improve customer satisfaction and conversion rates",
+      "To enhance product pricing strategies",
+      "To streamline the checkout process"
+    ],
+    correct: [0, 1, 3],
+    hint: "Think about direct benefits to the customer experience and checkout flow.",
+    explanation: "Effective prompts help tailor recommendations, improve satisfaction and conversion, and streamline the checkout process. Pricing strategies are not directly related to prompt crafting in checkout."
+  },
+  {
+    topic: "WordPress",
+    text: "What is a permalink in WordPress?",
+    multi: false,
+    options: [
+      "A link to a social media profile",
+      "A link to a specific blog post or page on a website",
+      "A link to a website's privacy policy",
+      "A temporary link used during website development"
+    ],
+    correct: [1],
+    hint: "Permalinks are permanent URLs for your content.",
+    explanation: "A permalink is a permanent URL that points to a specific blog post, page, or other content on a WordPress site."
+  },
+  {
+    topic: "WordPress",
+    text: "Moving blocks in and out of groups, rows, stacks, and columns is sometimes easiest with which tool?",
+    multi: false,
+    options: [
+      "The dashboard",
+      "List view",
+      "The styles panel",
+      "The full-site editor"
+    ],
+    correct: [1],
+    hint: "This tool shows a hierarchical outline of all blocks on the page.",
+    explanation: "List view provides a tree-like structure of all blocks, making it easy to drag and drop blocks into or out of groups, rows, stacks, and columns."
+  },
+  {
+    topic: "WordPress",
+    text: "Where are all the automatic backups of the site stored?",
+    multi: false,
+    options: [
+      "In \"Dashboard\", under the site health window",
+      "WordPress does not have automatic backups; it must be done through a plugin",
+      "In \"Settings\", under the \"general\" tab",
+      "In \"Tools\", under the \"export\" tab"
+    ],
+    correct: [1],
+    hint: "WordPress core does not include automatic backup functionality.",
+    explanation: "By default, WordPress does not have built-in automatic backups. You need to use a backup plugin or your hosting provider's tools to create and store backups."
+  },
+  {
+    topic: "WordPress",
+    text: "Amaya places a heading, image, and paragraph block together on a page. She wants to add a background behind the blocks, adjust the margins and padding so the cluster isn't the full width of the page, and place a border around all of the blocks. What would be the best way to do this?",
+    multi: false,
+    options: [
+      "Using the pattern block",
+      "Using the nest block",
+      "Using the column block",
+      "Using the group block"
+    ],
+    correct: [3],
+    hint: "This block allows you to group other blocks and apply styling to the entire group.",
+    explanation: "The Group block lets you wrap multiple blocks together, then apply a background, margins, padding, and borders to the entire group as a single unit."
+  },
+  {
+    topic: "WordPress",
+    text: "In AI plugin infrastructure for WordPress, what is a significant practice to prevent bloated markup and enhance website performance?",
+    multi: false,
+    options: [
+      "Increasing the number of JavaScript files",
+      "Adding more widgets to increase interactivity",
+      "Minimizing the use of auto-generated HTML structure",
+      "Embedding rich media content"
+    ],
+    correct: [2],
+    hint: "Bloated markup often comes from unnecessary auto-generated code.",
+    explanation: "Minimizing auto-generated HTML structure reduces excess code, keeping the page lightweight and improving performance, while the other options can add bloat or hurt performance."
+  },
+  {
+    topic: "WordPress",
+    text: "What is the purpose of locking blocks in the block editor?",
+    multi: false,
+    options: [
+      "To prevent changes from being made to it",
+      "To password protect information or portions of a site",
+      "To hide the content unless a user is logged in to the site",
+      "To stop it from moving as users scroll down a page"
+    ],
+    correct: [0],
+    hint: "Locking blocks is about restricting editing, not visibility or scrolling.",
+    explanation: "Locking a block prevents accidental or unauthorized changes to its content or settings, while other options relate to visibility or scrolling behavior."
+  },
+  {
+    topic: "WordPress",
+    text: "In relation to SEO, why is prompt crafting critical when using WordPress plugins or tools?",
+    multi: false,
+    options: [
+      "To automate all SEO tasks without manual input.",
+      "To disable all CSS stylesheets.",
+      "To produce structured, relevant, and easy-to-implement SEO strategies.",
+      "To clear cache regularly and automatically."
+    ],
+    correct: [2],
+    hint: "Effective prompts guide AI to generate useful, actionable SEO output.",
+    explanation: "Well-crafted prompts help produce organized, relevant SEO strategies that are easy to implement. Automation or cache clearing are not the primary reasons."
+  },
+  {
+    topic: "WordPress",
+    text: "Evaluate which of these attributes make a WordPress prompt successful in conveying its intended task. Select all that apply.",
+    multi: true,
+    options: [
+      "Clarity of purpose",
+      "Outline key steps explicitly",
+      "Use of technical jargon",
+      "Dependence on assumed knowledge"
+    ],
+    correct: [0, 1],
+    hint: "A good prompt is clear, specific, and does not rely on ambiguity.",
+    explanation: "Successful prompts are clear about their goal and explicitly outline steps. Jargon and assumed knowledge lead to confusion and incorrect outputs."
+  },
+  {
+    topic: "WordPress",
+    text: "Decide which tasks related to WordPress should be escalated to human experts rather than relying solely on AI tools. Select all the applicable options.",
+    multi: true,
+    options: [
+      "Processing customer payments and handling refunds",
+      "Optimizing images on a website",
+      "Conducting major site migrations",
+      "Drafting routine social media posts for the website",
+      "Developing custom production code"
+    ],
+    correct: [0, 2, 4],
+    hint: "High-risk, sensitive, or complex tasks require human oversight.",
+    explanation: "Payment processing, major migrations, and custom production code involve risk, security, or nuanced decisions that AI alone cannot safely handle. Image optimization and routine posts are suitable for AI assistance."
+  },
+  {
+    topic: "WordPress",
+    text: "On a real estate website, content about current market trends, tips for painting to attract buyers, hot new neighborhoods in the city, and other news would best be created as ______.",
+    multi: false,
+    options: [
+      "plugins",
+      "posts",
+      "categories",
+      "pages"
+    ],
+    correct: [1],
+    hint: "Time-sensitive, dated, or regularly updated content is usually posts.",
+    explanation: "Posts are designed for blog-style, time-stamped, and frequently updated content like news, tips, and trends, while pages are for static content."
+  },
+  {
+    topic: "WordPress",
+    text: "How many categories can a WordPress post be assigned to?",
+    multi: false,
+    options: [
+      "No categories can be assigned to a post",
+      "Up to three categories",
+      "As many categories as you want",
+      "Only one category"
+    ],
+    correct: [2],
+    hint: "Categories in WordPress are flexible, not limited to a small number.",
+    explanation: "WordPress allows you to assign a post to as many categories as you need, helping with content organization and discoverability."
+  },
+  {
+    topic: "WordPress",
+    text: "As a WordPress Developer, integrating prompts effectively into the website is crucial. Which method ensures a prompt is integrated properly within the site's interface?",
+    multi: false,
+    options: [
+      "Utilizing WordPress widgets for easy insertion",
+      "Placing prompts randomly within the content",
+      "Ignoring WordPress updates that affect shortcode functionality",
+      "Embedding prompts without testing across devices"
+    ],
+    correct: [0],
+    hint: "Use built-in tools that are designed for flexible placement and management.",
+    explanation: "WordPress widgets provide a standard, user-friendly way to insert prompts into sidebars, footers, or other widget areas, ensuring proper integration and maintainability."
+  },
+  {
+    topic: "WordPress",
+    text: "When integrating AI plugins into a WordPress site, what are key SEO and performance considerations you should keep in mind? Select all that apply.",
+    multi: true,
+    options: [
+      "Ensure unique titles and meta tags for AI-generated content",
+      "Ensure the AI plugin does not add excessive or bloated markup",
+      "Check impact on Largest Contentful Paint (LCP), Interaction to Next Paint (INP), and Cumulative Layout Shift (CLS)",
+      "Compress images generated by AI tools before use"
+    ],
+    correct: [0, 1, 2, 3],
+    hint: "All these affect SEO, speed, and user experience.",
+    explanation: "Unique titles/meta tags avoid duplicate content issues; avoiding bloated markup keeps code clean; monitoring Core Web Vitals (LCP, INP, CLS) ensures good performance; compressing AI-generated images reduces load time."
+  },
+  {
+    topic: "WordPress",
+    text: "Changing the color of a button on the home page to draw attention is an example of a ______.",
+    multi: false,
+    options: [
+      "Local change",
+      "Developer change",
+      "Global change",
+      "Admin change"
+    ],
+    correct: [0],
+    hint: "A change that applies only to a specific element on a specific page.",
+    explanation: "A local change affects only a single element or page, not the entire site. Changing one button's color on the home page is local, not global."
+  },
+  {
+  topic: "WordPress Management",
+  text: "What role does prompt crafting play in effective WordPress management?",
+  multi: false,
+  options: [
+    "Eliminates all plugin-related issues without additional tools",
+    "Generates unlimited bandwidth for WordPress site",
+    "Enhances the website’s user interface automatically",
+    "Provides refined AI-driven actions and responses"
+  ],
+  correct: [3],
+  hint: "Consider how prompts guide AI behavior.",
+  explanation: "Prompt crafting helps generate refined AI-driven actions and responses, improving WordPress management efficiency."
+  },
+  {
+    topic: "SEO Management",
+    text: "When managing SEO tasks on WordPress, which situation requires escalation to human expertise?",
+    multi: false,
+    options: [
+      "Adding meta tags to new posts",
+      "Developing an SEO strategy for a new branding campaign",
+      "Using an SEO plugin to optimize title tags",
+      "Monitoring website traffic fluctuations"
+    ],
+    correct: [1],
+    hint: "Think about tasks that require strategic thinking and creativity.",
+    explanation: "Developing an SEO strategy for a new branding campaign involves high-level planning and human judgment, unlike routine tasks."
+  },
+  {
+    topic: "AI Workflow",
+    text: "Which of the following steps should be included in a proper iterative workflow when using AI to manage a WordPress website?",
+    multi: false,
+    options: [
+      "Draft content first, seek no feedback, then test directly on the live site",
+      "Publish AI content without any iterations or tests",
+      "Request AI-generated outlines, draft content, revise with feedback, and test in staging",
+      "Only use AI prompts to generate content without an initial outline"
+    ],
+    correct: [2],
+    hint: "Iteration and testing are key to quality.",
+    explanation: "A proper iterative workflow includes outlines, drafting, feedback, revision, and staging testing before going live."
+  },
+  {
+    topic: "HTTP Errors",
+    text: "A 404 error occurs when:",
+    multi: false,
+    options: [
+      "there are corrupted browser caches or cookies",
+      "trying to upload a file that is too large.",
+      "your server received the browser's request but rejected it for some reason.",
+      "a user attempts to access a web page that doesn't exist."
+    ],
+    correct: [3],
+    hint: "HTTP status code 404 means 'Not Found'.",
+    explanation: "A 404 error indicates the requested web page does not exist on the server."
+  },
+  {
+    topic: "Web Accessibility",
+    text: "What is an example of an assistive technology for web accessibility?",
+    multi: false,
+    options: [
+      "A screen reader",
+      "A video player",
+      "A smartphone app",
+      "A search engine"
+    ],
+    correct: [0],
+    hint: "Think of tools that help people with disabilities use the web.",
+    explanation: "Screen readers are assistive technologies that read web content aloud for visually impaired users."
+  },
+  {
+    topic: "WordPress Prompts",
+    text: "Identify the essential elements of a clear WordPress query prompt. Choose all that apply.",
+    multi: true,
+    options: [
+      "General knowledge assumption",
+      "Structured format with bullet points",
+      "Specific goal or task",
+      "Ambiguous language"
+    ],
+    correct: [1, 2],
+    hint: "Clear prompts are organized and focused.",
+    explanation: "A clear WordPress query prompt should have a structured format and a specific goal. General assumptions and ambiguous language reduce clarity."
+  },
+  {
+    topic: "UI Design",
+    text: "What is user-interface (UI) design?",
+    multi: false,
+    options: [
+      "An AI tool built into WordPress to help beginners create better websites",
+      "An entire field dedicated to enhancing the visual appeal of a website",
+      "An entire field dedicated to how well a website works in terms of users being able to access information easily",
+      "A template feature that allows pages and posts to be created easily"
+    ],
+    correct: [1],
+    hint: "Think about how things look, not how they work.",
+    explanation: "UI design focuses on the visual aspects of a website, such as layout, colors, and buttons, making it attractive and easy to use."
+  },
+  {
+    topic: "WordPress Tasks",
+    text: "Which WordPress tasks should be escalated to human experts for best results? Select all that apply.",
+    multi: true,
+    options: [
+      "Troubleshooting severe website security issues",
+      "Evaluating and implementing payment system updates",
+      "Automatically categorizing new posts",
+      "Implementing custom newsletter scripts",
+      "Updating site logos and branding"
+    ],
+    correct: [0, 1, 3],
+    hint: "Complex, risky, or technical changes often need experts.",
+    explanation: "Security issues, payment systems, and custom scripting can affect site safety and functionality, so they should be handled by experienced professionals."
+  },
+  {
+    topic: "WordPress Editor",
+    text: "You’ve built a new landing page with headings, images, and a button. Before publishing it for visitors, what is the best way to see exactly how it will look?",
+    multi: false,
+    options: [
+      "View it from the Dashboard’s Posts section",
+      "Use the \"Preview\" option in the editor",
+      "Switch to Write mode to clean up the blocks",
+      "Visit the homepage and refresh your browser"
+    ],
+    correct: [1],
+    hint: "WordPress has a built-in way to see pages before they go live.",
+    explanation: "The Preview option shows exactly how your page will appear to visitors without publishing it."
+  },
+  {
+    topic: "WordPress Basics",
+    text: "CMS is an abbreviation for:",
+    multi: false,
+    options: [
+      "Changeable Management System",
+      "Common Management System",
+      "Content Management System",
+      "Clear Management System"
+    ],
+    correct: [2],
+    hint: "It describes how website content is created and managed.",
+    explanation: "CMS stands for Content Management System, which allows users to create, manage, and update website content easily."
+  },
+  {
+    topic: "WordPress Security",
+    text: "When deploying AI-generated PHP code on a WordPress site, which security measure should you prioritize checking?",
+    multi: false,
+    options: [
+      "Check if the code uses a sufficient amount of comments",
+      "Assess if the code is vulnerable to SQL injection attacks",
+      "Ensure the code has complex variable names",
+      "Verify the presence of colorful syntax highlighting"
+    ],
+    correct: [1],
+    hint: "Focus on protecting data and preventing attacks.",
+    explanation: "SQL injection vulnerabilities can allow attackers to access or damage databases, so checking for them is critical."
+  },
+  {
+    topic: "WordPress Features",
+    text: "In WordPress, which of the following features is most commonly used to create navigation menus, calls to action, and keyword search areas?",
+    multi: false,
+    options: [
+      "Block-based templates",
+      "Patterns and reusable blocks",
+      "Widgets and navigation blocks",
+      "Theme customizer"
+    ],
+    correct: [2],
+    hint: "These tools are often placed in headers, footers, or sidebars.",
+    explanation: "Widgets and navigation blocks are commonly used to build menus, buttons, and search areas across a site."
+  },
+  {
+    topic: "Web Accessibility",
+    text: "What should web designers prioritize to create an inclusive user experience?",
+    multi: false,
+    options: [
+      "Ensuring all elements are accessible to users with disabilities",
+      "Using complex animations everywhere",
+      "Designing every page to look identical",
+      "Focusing solely on an attractive color palette"
+    ],
+    correct: [0],
+    hint: "Think about all users, including those with different abilities.",
+    explanation: "Inclusive design ensures websites can be used by people with disabilities through accessibility-friendly features."
+  },
+  {
+    topic: "SEO",
+    text: "Which of the following is a recommended practice when writing SEO titles for a WordPress post?",
+    multi: false,
+    options: [
+      "Keep SEO titles under 60 characters",
+      "Avoid using numbers and punctuation in SEO titles",
+      "Avoid using primary keywords in the SEO title",
+      "Use the same title for every page"
+    ],
+    correct: [0],
+    hint: "Search engines may cut off long titles.",
+    explanation: "Keeping SEO titles under 60 characters helps ensure they display properly in search results."
+  },
+  {
+    topic: "CSS Basics",
+    text: "Dimitri wants to change the shape of a button from a rectangle with squared corners to have more rounded corners. What does he need to adjust?",
+    multi: false,
+    options: [
+      "The border radius",
+      "The padding",
+      "The shape settings",
+      "The margin"
+    ],
+    correct: [0],
+    hint: "This controls how sharp or round corners are.",
+    explanation: "The border radius property controls how rounded the corners of a button appear."
+  },
+  {
+    topic: "WordPress Basics",
+    text: "What is one difference between a post and a page in WordPress?",
+    multi: false,
+    options: [
+      "Posts are limited to 75,000 words and a media file size of 75 MB, while pages have no space limits",
+      "Posts are meant to be added frequently, while pages are usually only changed a couple times a year",
+      "Pages have access to more design blocks than posts",
+      "The number of pages on a site is limited, but posts have no limit"
+    ],
+    correct: [1],
+    hint: "Think about how often each type is updated.",
+    explanation: "Posts are typically used for timely or regularly updated content like blog entries, while pages are for more permanent content such as About or Contact pages."
+  },
+  {
+    topic: "WordPress Editor",
+    text: "Dylan began creating a new page. He added a title in the \"Add Title\" area. He wants to center the title, but when he clicks the block, it says \"no block selected\" in the settings panel. How can he change the alignment of the title?",
+    multi: false,
+    options: [
+      "There is no way to change the alignment or any other style settings for a title",
+      "Go into the full-site editor to change the alignment on the template",
+      "Right-click the block and select \"force change\"",
+      "Use the pop-up menu above the block and press \"make editable\""
+    ],
+    correct: [1],
+    hint: "Some title settings are controlled by templates, not the page editor.",
+    explanation: "The page title is often controlled by the site’s template, so alignment changes must be made in the full-site editor."
+  },
+  {
+    topic: "WordPress Prompts",
+    text: "What is the significance of well-crafted prompts in scheduling content on a WordPress site? Choose all that are correct.",
+    multi: true,
+    options: [
+      "To ensure timely publication of posts",
+      "To automate content updates and publishing",
+      "To involve multiple stakeholders in content revisions",
+      "To enhance the visual appeal of the homepage"
+    ],
+    correct: [0, 1, 2],
+    hint: "Think about planning, timing, and teamwork.",
+    explanation: "Well-written prompts help schedule posts on time, automate publishing tasks, and support collaboration during content creation and revisions."
+  },
+  {
+    topic: "Site Design",
+    text: "Isabella updated her logo colors and wants all her headings on the website to match. What is the easiest way for her to change all the headings from the default color to her new color?",
+    multi: false,
+    options: [
+      "Change the block settings in the full-site editor",
+      "Edit all her pages and posts one-by-one to show the change",
+      "Find and install a plugin that changes the colors",
+      "Update the settings on each template she used for her posts and pages"
+    ],
+    correct: [0],
+    hint: "Global changes are best made in one place.",
+    explanation: "Using the full-site editor allows global styles to be updated once, automatically applying the new heading color across the entire site."
+  },
+  {
+    topic: "WordPress Blocks",
+    text: "Featured image, excerpt, and site logo are all _________ blocks.",
+    multi: false,
+    options: [
+      "dynamic",
+      "static",
+      "analytical",
+      "custom"
+    ],
+    correct: [0],
+    hint: "These blocks change based on the content or page.",
+    explanation: "Dynamic blocks display content that changes depending on the page, such as featured images, excerpts, and site logos."
+  },
+  {
+    topic: "WordPress Basics",
+    text: "Select all the statements that are true for WordPress (WP):",
+    multi: true,
+    options: [
+      "WP is a video streaming platform",
+      "WP is a CMS",
+      "WP is suitable for creating games",
+      "WP is an open-source system"
+    ],
+    correct: [1, 3],
+    hint: "Think about what WordPress is mainly designed to do and how it is licensed.",
+    explanation: "WordPress is a Content Management System (CMS) that is open-source. It is not a video streaming platform, and while it can be extended, it is not primarily designed for creating games."
+  },
+  {
+    topic: "WordPress Prompts",
+    text: "As a freelance WordPress developer creating guides for clients, which components enhance the effectiveness of prompts when explaining website maintenance tasks? Choose all that apply.",
+    multi: true,
+    options: [
+      "References to advanced WordPress functions",
+      "Clear maintenance task definitions",
+      "Simple language with no assumptions",
+      "Use of humor to lighten the mood"
+    ],
+    correct: [1, 2],
+    hint: "Effective prompts should be easy for clients to understand and follow.",
+    explanation: "Clear task definitions and simple, assumption-free language help clients understand what needs to be done without confusion. Advanced references or humor may not always improve clarity."
+  }
+];
+
+// ─────────────────────────────────────────────
+//  STATE
+// ─────────────────────────────────────────────
+let QUESTIONS = [];          // active shuffled+trimmed set
+let currentQ  = 0;
+let score     = 0;
+let selectedOptions = [];
+let answered  = false;
+let userAnswers = [];
+let playerName  = '';
+let quizStartTime = null;
+
+// ─────────────────────────────────────────────
+//  HELPERS
+// ─────────────────────────────────────────────
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function arraysMatch(a, b) {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+function formatDateTime(date) {
+  const pad = n => String(n).padStart(2, '0');
+  const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return `${days[date.getDay()]}, ${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()} — ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
+
+// ─────────────────────────────────────────────
+//  INIT — display question count on welcome
+// ─────────────────────────────────────────────
+(function init() {
+  const hidden  = Math.floor(ALL_QUESTIONS.length * 0.10);
+  const visible = ALL_QUESTIONS.length - hidden;
+  document.getElementById('total-q-display').textContent = visible;
+})();
+
+// ─────────────────────────────────────────────
+//  START QUIZ
+// ─────────────────────────────────────────────
+function startQuiz() {
+  const nameInput = document.getElementById('player-name');
+  const nameErr   = document.getElementById('name-error');
+  playerName = nameInput.value.trim();
+
+  if (!playerName) {
+    nameErr.classList.add('show');
+    nameInput.focus();
+    return;
+  }
+  nameErr.classList.remove('show');
+
+  // Shuffle all questions, then drop 10%
+  const shuffled = shuffle(ALL_QUESTIONS);
+  const dropCount = Math.floor(shuffled.length * 0.10);
+  QUESTIONS = shuffled.slice(0, shuffled.length - dropCount);
+
+  currentQ = 0; score = 0; userAnswers = [];
+  quizStartTime = new Date();
+
+  document.getElementById('q-total').textContent = QUESTIONS.length;
+  document.getElementById('welcome-screen').classList.remove('active');
+  document.getElementById('quiz-screen').classList.add('active');
+  renderQuestion();
+}
+
+// ─────────────────────────────────────────────
+//  RENDER QUESTION
+// ─────────────────────────────────────────────
+function renderQuestion() {
+  const q = QUESTIONS[currentQ];
+  answered = false;
+  selectedOptions = [];
+
+  document.getElementById('q-num').textContent  = currentQ + 1;
+  document.getElementById('q-total').textContent = QUESTIONS.length;
+  document.getElementById('progress-fill').style.width = ((currentQ / QUESTIONS.length) * 100) + '%';
+  document.getElementById('live-score').textContent = score;
+  document.getElementById('q-topic').textContent = q.topic;
+  document.getElementById('q-text').textContent  = q.text;
+
+  const multiTag = document.getElementById('multi-tag');
+  multiTag.style.display = q.multi ? 'inline-block' : 'none';
+
+  const ctx = document.getElementById('q-context');
+  if (q.context) { ctx.style.display = 'block'; ctx.textContent = q.context; }
+  else ctx.style.display = 'none';
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+  const letters = ['A','B','C','D','E','F'];
+  q.options.forEach((opt, i) => {
+    const el = document.createElement('div');
+    el.className = 'opt';
+    el.innerHTML = `<div class="opt-letter">${letters[i]}</div><div style="flex:1">${opt}</div><div class="opt-check"></div>`;
+    el.addEventListener('click', () => toggleOption(i, el, q.multi));
+    grid.appendChild(el);
+  });
+
+  // Reset hint
+  const hintPanel = document.getElementById('hint-panel');
+  hintPanel.classList.remove('show');
+  hintPanel.textContent = '';
+
+  // Reset explanation
+  const expPanel = document.getElementById('explanation-panel');
+  expPanel.classList.remove('show','correct-exp','incorrect-exp');
+
+  // Reset buttons
+  const btnSubmit = document.getElementById('btn-submit');
+  const btnNext   = document.getElementById('btn-next');
+  const btnHint   = document.getElementById('btn-hint');
+  btnSubmit.disabled = true;
+  btnSubmit.style.display = '';
+  btnNext.classList.remove('show');
+  btnHint.disabled = false;   // re-enable hint for each new question
+
+  // Re-animate card
+  const card = document.querySelector('.q-card');
+  card.style.animation = 'none';
+  card.offsetHeight;
+  card.style.animation = 'fadeIn 0.35s ease';
+}
+
+// ─────────────────────────────────────────────
+//  TOGGLE OPTION
+// ─────────────────────────────────────────────
+function toggleOption(i, el, multi) {
+  if (answered) return;
+  if (multi) {
+    if (selectedOptions.includes(i)) {
+      selectedOptions = selectedOptions.filter(x => x !== i);
+      el.classList.remove('selected');
+    } else {
+      selectedOptions.push(i);
+      el.classList.add('selected');
+    }
+  } else {
+    document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
+    selectedOptions = [i];
+    el.classList.add('selected');
+  }
+  document.getElementById('btn-submit').disabled = selectedOptions.length === 0;
+}
+
+// ─────────────────────────────────────────────
+//  SHOW HINT — only before answering
+// ─────────────────────────────────────────────
+function showHint() {
+  if (answered) return;
+  const panel = document.getElementById('hint-panel');
+  panel.textContent = QUESTIONS[currentQ].hint;
+  panel.classList.add('show');
+  // Disable hint button after showing (so it can't be clicked again)
+  document.getElementById('btn-hint').disabled = true;
+}
+
+// ─────────────────────────────────────────────
+//  SUBMIT ANSWER
+// ─────────────────────────────────────────────
+function submitAnswer() {
+  if (answered) return;
+  answered = true;
+
+  const q       = QUESTIONS[currentQ];
+  const correct = q.correct;
+  const isCorrect = arraysMatch(selectedOptions.sort(), [...correct].sort());
+
+  if (isCorrect) score++;
+  userAnswers.push({ qIndex: currentQ, selected: [...selectedOptions], isCorrect });
+
+  // Highlight options
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((el, i) => {
+    el.classList.add('locked');
+    if (correct.includes(i)) {
+      el.classList.add('correct');
+      el.querySelector('.opt-check').textContent = '✓';
+    } else if (selectedOptions.includes(i) && !correct.includes(i)) {
+      el.classList.add('incorrect');
+      el.querySelector('.opt-check').textContent = '✗';
+    }
+  });
+
+  // Show explanation
+  const expPanel = document.getElementById('explanation-panel');
+  expPanel.classList.remove('correct-exp','incorrect-exp');
+  expPanel.classList.add('show', isCorrect ? 'correct-exp' : 'incorrect-exp');
+  document.getElementById('exp-head').textContent = isCorrect ? '✓ Correct!' : '✗ Not Quite';
+  document.getElementById('exp-body').textContent = q.explanation;
+
+  // Hide hint button after answering
+  document.getElementById('btn-hint').disabled = true;
+
+  // Swap buttons
+  document.getElementById('btn-submit').style.display = 'none';
+  document.getElementById('live-score').textContent = score;
+  document.getElementById('btn-next').classList.add('show');
+}
+
+// ─────────────────────────────────────────────
+//  NEXT QUESTION
+// ─────────────────────────────────────────────
+function nextQuestion() {
+  document.getElementById('btn-submit').style.display = '';
+  currentQ++;
+  if (currentQ >= QUESTIONS.length) {
+    showResults();
+  } else {
+    renderQuestion();
+  }
+}
+
+// ─────────────────────────────────────────────
+//  RESULTS
+// ─────────────────────────────────────────────
+function showResults() {
+  document.getElementById('quiz-screen').classList.remove('active');
+  document.getElementById('result-screen').classList.add('active');
+
+  const total = QUESTIONS.length;
+  const pct   = Math.round((score / total) * 100);
+
+  // Player name banner
+  document.getElementById('player-banner').textContent = playerName;
+
+  // Timestamp
+  const finishTime = new Date();
+  document.getElementById('timestamp-card').textContent = 'Completed: ' + formatDateTime(finishTime);
+
+  // Scores
+  document.getElementById('final-score-num').textContent  = score;
+  document.getElementById('final-score-denom').textContent = '/ ' + total;
+  document.getElementById('bc-correct').textContent = score;
+  document.getElementById('bc-wrong').textContent   = total - score;
+  document.getElementById('bc-pct').textContent     = pct + '%';
+
+  // Animate arc
+  setTimeout(() => {
+    const circ   = 2 * Math.PI * 68;
+    const offset = circ * (1 - score / total);
+    const arc    = document.getElementById('result-arc');
+    arc.style.transition     = 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)';
+    arc.style.strokeDashoffset = offset;
+  }, 200);
+
+  // Performance message
+  let title, sub, icon, certMsg;
+  if (pct >= 85) {
+    title = '🏆 Outstanding!';
+    sub   = 'You are well-prepared for the WP certification exam!';
+    icon  = '🎓';
+    certMsg = 'Excellent work! Your score suggests you\'re ready to sit the official WP certification exam. Review any missed questions and you\'ll be set.';
+  } else if (pct >= 70) {
+    title = '⭐ Great Job!';
+    sub   = 'Solid performance — a little more review and you\'ll be exam-ready.';
+    icon  = '📈';
+    certMsg = 'Good foundation! Focus on reviewing your incorrect answers and the topics you found challenging. One more practice round should do it.';
+  } else if (pct >= 50) {
+    title = '💪 Keep Going!';
+    sub   = 'You know the basics — now it\'s time to solidify your understanding.';
+    icon  = '📚';
+    certMsg = 'Keep studying! Review the explanations for missed questions and revisit the core WP topics. Practice makes perfect.';
+  } else {
+    title = '🌱 Just Getting Started';
+    sub   = 'Every expert was once a beginner. Review and try again!';
+    icon  = '🔍';
+    certMsg = 'Don\'t be discouraged! Read through all the explanations carefully and try again. The key concepts will start clicking with more exposure.';
+  }
+
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-sub').textContent   = sub;
+  document.getElementById('cert-bar').innerHTML = `<div class="cert-icon">${icon}</div><div><h4>Certification Readiness</h4><p>${certMsg}</p></div>`;
+
+  // Review items
+  const reviewEl = document.getElementById('review-items');
+  reviewEl.innerHTML = '';
+  const letters = ['A','B','C','D','E','F'];
+  userAnswers.forEach((ua, idx) => {
+    const q = QUESTIONS[ua.qIndex];
+    const selectedLetters = ua.selected.map(i => letters[i]).join(', ');
+    const correctLetters  = q.correct.map(i => letters[i]).join(', ');
+    const el = document.createElement('div');
+    el.className = 'review-item';
+    el.innerHTML = `
+      <div class="ri-dot ${ua.isCorrect ? 'right' : 'wrong'}"></div>
+      <div class="ri-q">
+        <strong>Q${idx + 1}:</strong> ${q.text.slice(0, 80)}${q.text.length > 80 ? '…' : ''}
+        ${!ua.isCorrect ? `<br><span class="ri-correct-ans">Correct: ${correctLetters}</span>` : ''}
+      </div>
+      <div class="ri-ans">Your answer: ${selectedLetters}</div>
+    `;
+    reviewEl.appendChild(el);
+  });
+}
+
+// ─────────────────────────────────────────────
+//  RESTART
+// ─────────────────────────────────────────────
+function restartQuiz() {
+  document.getElementById('result-screen').classList.remove('active');
+  document.getElementById('result-arc').style.transition    = 'none';
+  document.getElementById('result-arc').style.strokeDashoffset = 427;
+  // Go back to welcome so player can change name if desired
+  document.getElementById('welcome-screen').classList.add('active');
+  document.getElementById('player-name').value = playerName; // pre-fill name
+}
+</script>
+</body>
+</html>
